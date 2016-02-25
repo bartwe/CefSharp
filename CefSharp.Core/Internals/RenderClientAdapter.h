@@ -172,6 +172,9 @@ namespace CefSharp
                     bitmapInfo->Width = width;
                     bitmapInfo->Height = height;
                     bitmapInfo->NumberOfBytes = numberOfBytes;
+
+					rect = CefDirtyRect(0, 0, width, height);
+					bitmapInfo->DirtyRect = CefDirtyRect(0, 0, width, height);
                 }               
 
                 if ((rect.Width != 0) && (rect.Height != 0))
