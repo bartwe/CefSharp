@@ -120,13 +120,17 @@ namespace CefSharp
 
                 lock l(bitmapInfo->BitmapLock);
 
+				CefDirtyRect rect = CefDirtyRect(0, 0, 0, 0);
+
                 if(bitmapInfo->DirtyRectSupport)
                 {
                     //NOTE: According to https://bitbucket.org/chromiumembedded/branches-2171-cef3/commits/ce984ddff3268a50cf9967487327e1257015b98c
                     // There is only one rect now that's a union of all dirty regions. API Still passes in a vector
 
-                    CefRect r = dirtyRects.front();
-                    bitmapInfo->DirtyRect = CefDirtyRect(r.x, r.y, r.width, r.height);
+					for(auto const& r: dirtyRects) {
+	                     rect = rect.Combine(CefDirtyRect(r.x, r.y, r.width, r.height));
+					}
+					bitmapInfo->DirtyRect = bitmapInfo->DirtyRect.Combine(rect);
                 }
 
                 auto backBufferHandle = (HANDLE)bitmapInfo->BackBufferHandle;
@@ -167,10 +171,17 @@ namespace CefSharp
                     bitmapInfo->NumberOfBytes = numberOfBytes;
                 }               
 
-                if (!bitmapInfo->DirtyRectSupport || ((bitmapInfo->DirtyRect.Width != 0) && (bitmapInfo->DirtyRect.Height != 0)))
+				if (!bitmapInfo->DirtyRectSupport) {
+					rect = CefDirtyRect(0, 0, width, height);
+				}
+
+                if ((rect.Width != 0) && (rect.Height != 0))
                 {
                     // If pixels have changed, copy them over.
-                    CopyMemory(backBufferHandle, (void*)buffer, bitmapInfo->NumberOfBytes);
+
+					int offset = bitmapInfo->BytesPerPixel * rect.Y * rect.Width;
+					int count = bitmapInfo->BytesPerPixel * rect.Height * rect.Width;
+                    CopyMemory(((char*)backBufferHandle) + offset, ((char*)buffer) + offset, count);
                 }
 
                 _renderWebBrowser->InvokeRenderAsync(bitmapInfo);
