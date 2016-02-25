@@ -130,10 +130,13 @@ namespace CefSharp
 					for(auto const& r: dirtyRects) {
 	                     rect = rect.Combine(CefDirtyRect(r.x, r.y, r.width, r.height));
 					}
-					bitmapInfo->DirtyRect = bitmapInfo->DirtyRect.Combine(rect);
                 }
-
-                auto backBufferHandle = (HANDLE)bitmapInfo->BackBufferHandle;
+				else
+				{
+					rect = CefDirtyRect(0, 0, width, height);
+				}
+				
+				auto backBufferHandle = (HANDLE)bitmapInfo->BackBufferHandle;
 
                 if (backBufferHandle == NULL || bitmapInfo->Width != width || bitmapInfo->Height != height)
                 {
@@ -171,18 +174,16 @@ namespace CefSharp
                     bitmapInfo->NumberOfBytes = numberOfBytes;
                 }               
 
-				if (!bitmapInfo->DirtyRectSupport) {
-					rect = CefDirtyRect(0, 0, width, height);
-				}
-
                 if ((rect.Width != 0) && (rect.Height != 0))
-                {
-                    // If pixels have changed, copy them over.
-
-					int offset = bitmapInfo->BytesPerPixel * rect.Y * rect.Width;
-					int count = bitmapInfo->BytesPerPixel * rect.Height * rect.Width;
-                    CopyMemory(((char*)backBufferHandle) + offset, ((char*)buffer) + offset, count);
+	           {
+					// If pixels have changed, copy them over.
+					
+					int offset = bitmapInfo->BytesPerPixel * rect.Y * width;
+					int count = bitmapInfo->BytesPerPixel * rect.Height * width;
+					CopyMemory(((char*)backBufferHandle) + offset, ((char*)buffer) + offset, count);
                 }
+
+				bitmapInfo->DirtyRect = bitmapInfo->DirtyRect.Combine(rect);
 
                 _renderWebBrowser->InvokeRenderAsync(bitmapInfo);
             };
