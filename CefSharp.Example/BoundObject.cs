@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -56,7 +56,9 @@ namespace CefSharp.Example
 
                 using (javascriptCallback)
                 {
-                    await javascriptCallback.ExecuteAsync("This callback from C# was delayed " + taskDelay + "ms");
+                    //NOTE: Classes are not supported, simple structs are
+                    var response = new CallbackResponseStruct("This callback from C# was delayed " + taskDelay + "ms");
+                    await javascriptCallback.ExecuteAsync(response);
                 }
             });
         }

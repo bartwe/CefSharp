@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -10,17 +10,20 @@ namespace CefSharp
     {
         internal static void SetHandlersToNull(this IWebBrowserInternal browser)
         {
-            browser.ResourceHandlerFactory = null;
-            browser.JsDialogHandler = null;
             browser.DialogHandler = null;
-            browser.DownloadHandler = null;
-            browser.KeyboardHandler = null;
+            browser.RequestHandler = null;
+            browser.DisplayHandler = null;
+            browser.LoadHandler = null;
             browser.LifeSpanHandler = null;
+            browser.KeyboardHandler = null;
+            browser.JsDialogHandler = null;
+            browser.DragHandler = null;
+            browser.DownloadHandler = null;
             browser.MenuHandler = null;
             browser.FocusHandler = null;
-            browser.RequestHandler = null;
-            browser.DragHandler = null;
+            browser.ResourceHandlerFactory = null;
             browser.GeolocationHandler = null;
+            browser.RenderProcessMessageHandler = null;
         }
     }
 }

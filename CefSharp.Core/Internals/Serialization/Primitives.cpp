@@ -1,4 +1,4 @@
-// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -37,7 +37,7 @@ namespace CefSharp
             }
 
             template<typename TList, typename TIndex>
-            void SetInt64(const int64 &value, const CefRefPtr<TList>& list, TIndex index)
+            void SetInt64(const CefRefPtr<TList>& list, TIndex index, const int64 &value)
             {
                 unsigned char mem[1 + sizeof(int64)];
                 mem[0] = static_cast<unsigned char>(PrimitiveType::INT64);
@@ -65,7 +65,7 @@ namespace CefSharp
             }
 
             template<typename TList, typename TIndex>
-            void SetCefTime(const CefTime &value, const CefRefPtr<TList>& list, TIndex index)
+            void SetCefTime(const CefRefPtr<TList>& list, TIndex index, const CefTime &value)
             {
                 auto doubleT = value.GetDoubleT();
                 unsigned char mem[1 + sizeof(double)];
@@ -93,7 +93,7 @@ namespace CefSharp
                 return IsType(PrimitiveType::CEFTIME, list, index);
             }
             template<typename TList, typename TIndex>
-            void SetJsCallback(JavascriptCallback^ value, const CefRefPtr<TList>& list, TIndex index)
+            void SetJsCallback(const CefRefPtr<TList>& list, TIndex index, JavascriptCallback^ value)
             {
                 auto id = value->Id;
                 auto browserId = value->BrowserId;
@@ -134,27 +134,6 @@ namespace CefSharp
             {
                 return IsType(PrimitiveType::JSCALLBACK, list, index);
             }
-
-            template void SetInt64(const int64 &value, const CefRefPtr<CefListValue>& list, int index);
-            template void SetInt64(const int64 &value, const CefRefPtr<CefDictionaryValue>& list, CefString index);
-            template int64 GetInt64(const CefRefPtr<CefListValue>& list, int index);
-            template int64 GetInt64(const CefRefPtr<CefDictionaryValue>& list, CefString index);
-            template bool IsInt64(const CefRefPtr<CefListValue>& list, int index);
-            template bool IsInt64(const CefRefPtr<CefDictionaryValue>& list, CefString index);
-
-            template void SetCefTime(const CefTime &value, const CefRefPtr<CefListValue>& list, int index);
-            template void SetCefTime(const CefTime &value, const CefRefPtr<CefDictionaryValue>& list, CefString index);
-            template CefTime GetCefTime(const CefRefPtr<CefListValue>& list, int index);
-            template CefTime GetCefTime(const CefRefPtr<CefDictionaryValue>& list, CefString index);
-            template bool IsCefTime(const CefRefPtr<CefListValue>& list, int index);
-            template bool IsCefTime(const CefRefPtr<CefDictionaryValue>& list, CefString index);
-
-            template void SetJsCallback(JavascriptCallback^ value, const CefRefPtr<CefListValue>& list, int index);
-            template void SetJsCallback(JavascriptCallback^ value, const CefRefPtr<CefDictionaryValue>& list, CefString index);
-            template JavascriptCallback^ GetJsCallback(const CefRefPtr<CefListValue>& list, int index);
-            template JavascriptCallback^ GetJsCallback(const CefRefPtr<CefDictionaryValue>& list, CefString index);
-            template bool IsJsCallback(const CefRefPtr<CefListValue>& list, int index);
-            template bool IsJsCallback(const CefRefPtr<CefDictionaryValue>& list, CefString index);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright © 2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -48,7 +48,7 @@ namespace CefSharp.WinForms.Internals
         /// Adjust the form to listen to if the ChromiumWebBrowserControl's parent changes.
         /// </summary>
         /// <param name="sender">The ChromiumWebBrowser whose parent has changed.</param>
-        /// <param name="e"></param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void ParentParentChanged(object sender, EventArgs e)
         {
             var control = (Control)sender;
@@ -205,7 +205,7 @@ namespace CefSharp.WinForms.Internals
 
             if (Browser.IsBrowserInitialized)
             {
-                Browser.NotifyMoveOrResizeStarted();
+                Browser.GetBrowser().GetHost().NotifyMoveOrResizeStarted();
             }
 
             isMoving = false;

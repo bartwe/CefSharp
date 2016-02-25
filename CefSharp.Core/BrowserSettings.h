@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -177,16 +177,6 @@ namespace CefSharp
             CefState get() { return (CefState)_browserSettings->caret_browsing; }
             void set(CefState value) { _browserSettings->caret_browsing = (cef_state_t)value; }
         }
-
-        /// <summary>
-        /// Controls whether the Java plugin will be loaded. Also configurable using
-        /// the "disable-java" command-line switch.
-        /// </summary>
-        property CefState Java
-        {
-            CefState get() { return (CefState)_browserSettings->java; }
-            void set(CefState value) { _browserSettings->java = (cef_state_t)value; }
-        } 
 
         /// <summary>
         /// Controls whether any plugins will be loaded. Also configurable using the

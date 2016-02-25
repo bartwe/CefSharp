@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -19,6 +19,7 @@ namespace CefSharp
     internal:
         ::CefSettings* _cefSettings;
         List<CefCustomScheme^>^ _cefCustomSchemes;
+        bool _focusedNodeChangedEnabled;
 
     public:
         CefSettings() : _cefSettings(new ::CefSettings())
@@ -35,6 +36,8 @@ namespace CefSharp
 
             //Temp workaround for https://github.com/cefsharp/CefSharp/issues/1203
             _cefCommandLineArgs->Add("process-per-tab", "1");
+
+            _focusedNodeChangedEnabled = false;
         }
 
         !CefSettings()
@@ -81,6 +84,20 @@ namespace CefSharp
         }
 
         /// <summary>
+        /// The location where user data such as spell checking dictionary files will
+        /// be stored on disk. If empty then the default platform-specific user data
+        /// directory will be used ("~/.cef_user_data" directory on Linux,
+        /// "~/Library/Application Support/CEF/User Data" directory on Mac OS X,
+        /// "Local Settings\Application Data\CEF\User Data" directory under the user
+        /// profile directory on Windows).
+        /// </summary>
+        property String^ UserDataPath
+        {
+            String^ get() { return StringUtils::ToClr(_cefSettings->user_data_path); }
+            void set(String^ value) { StringUtils::AssignNativeFromClr(_cefSettings->user_data_path, value); }
+        }
+
+        /// <summary>
         /// Set to true in order to completely ignore SSL certificate errors.
         /// This is NOT recommended.
         /// </summary>
@@ -120,6 +137,17 @@ namespace CefSharp
             void set(CefSharp::LogSeverity value) { _cefSettings->log_severity = (cef_log_severity_t)value; }
         }
 
+        /// <summary>
+        /// Custom flags that will be used when initializing the V8 JavaScript engine.
+        /// The consequences of using custom flags may not be well tested. Also
+        /// configurable using the "js-flags" command-line switch.
+        /// </summary>
+        property String^ JavascriptFlags
+        {
+            String^ get() { return StringUtils::ToClr(_cefSettings->javascript_flags); }
+            void set(String^ value) { StringUtils::AssignNativeFromClr(_cefSettings->javascript_flags, value); }
+        }
+
         property bool PackLoadingDisabled
         {
             bool get() { return _cefSettings->pack_loading_disabled == 1; }
@@ -137,6 +165,19 @@ namespace CefSharp
             int get() { return _cefSettings->remote_debugging_port; }
             void set(int value) { _cefSettings->remote_debugging_port = value; }
         }
+
+        /// <summary>
+        /// The number of stack trace frames to capture for uncaught exceptions.
+        /// Specify a positive value to enable the CefRenderProcessHandler::
+        /// OnUncaughtException() callback. Specify 0 (default value) and
+        /// OnUncaughtException() will not be called. Also configurable using the
+        /// "uncaught-exception-stack-size" command-line switch.
+        /// </summary>
+        property int UncaughtExceptionStackSize
+        {
+            int get() { return _cefSettings->uncaught_exception_stack_size; }
+            void set(int value) { _cefSettings->uncaught_exception_stack_size = value; }
+        }		
 
         property String^ UserAgent
         {
@@ -166,6 +207,17 @@ namespace CefSharp
         {
             String^ get() { return StringUtils::ToClr(_cefSettings->accept_language_list); }
             void set(String^ value) { StringUtils::AssignNativeFromClr(_cefSettings->accept_language_list, value); }
+        }
+
+        /// <summary>
+        /// If true a message will be sent from the render subprocess to the
+        /// browser when a DOM node (or no node) gets focus. The default is
+        /// false.
+        /// </summary>
+        property bool FocusedNodeChangedEnabled
+        {
+            bool get() { return _focusedNodeChangedEnabled; }
+            void set(bool value) { _focusedNodeChangedEnabled = value; }
         }
 
         /// <summary>

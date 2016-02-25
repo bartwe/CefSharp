@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -35,6 +35,8 @@ namespace CefSharp.OffScreen
         /// </summary>
         private Size size = new Size(1366, 768);
 
+        private IBrowser browser;
+
         /// <summary>
         /// Flag to guard the creation of the underlying offscreen browser - only one instance can be created
         /// </summary>
@@ -62,6 +64,7 @@ namespace CefSharp.OffScreen
         public IResourceHandlerFactory ResourceHandlerFactory { get; set; }
         public IGeolocationHandler GeolocationHandler { get; set; }
         public IBitmapFactory BitmapFactory { get; set; }
+        public IRenderProcessMessageHandler RenderProcessMessageHandler { get; set; }
 
         public event EventHandler<LoadErrorEventArgs> LoadError;
         public event EventHandler<FrameLoadStartEventArgs> FrameLoadStart;
@@ -107,7 +110,7 @@ namespace CefSharp.OffScreen
 
             if(automaticallyCreateBrowser)
             {
-                CreateBrowser(IntPtr.Zero, address, browserSettings, requestcontext);
+                CreateBrowser(IntPtr.Zero);
             }
             
         }
@@ -142,6 +145,7 @@ namespace CefSharp.OffScreen
 
             if (disposing)
             {
+                browser = null;
                 IsBrowserInitialized = false;
 
                 if (bitmap != null)
@@ -168,13 +172,11 @@ namespace CefSharp.OffScreen
         }
 
         /// <summary>
-        /// Create the underlying browser
+        /// Create the underlying browser. The instance address, browser settings and request context will be used.
         /// </summary>
         /// <param name="windowHandle">Window handle if any, IntPtr.Zero is the default</param>
-        /// <param name="address">Initial address (url) to load</param>
-        /// <param name="browserSettings">The browser settings to use. If null, the default settings are used.</param>
-        /// <param name="requestcontext">See <see cref="RequestContext"/> for more details. Defaults to null</param>
-        public void CreateBrowser(IntPtr windowHandle, string address = "", BrowserSettings browserSettings = null, RequestContext requestcontext = null)
+        
+        public void CreateBrowser(IntPtr windowHandle)
         {
             if (browserCreated)
             {
@@ -183,7 +185,7 @@ namespace CefSharp.OffScreen
 
             browserCreated = true;
 
-            managedCefBrowserAdapter.CreateOffscreenBrowser(windowHandle, browserSettings, requestcontext, address);
+            managedCefBrowserAdapter.CreateOffscreenBrowser(windowHandle, BrowserSettings, RequestContext, Address);
         }
 
         /// <summary>
@@ -199,7 +201,11 @@ namespace CefSharp.OffScreen
                 if (size != value)
                 {
                     size = value;
-                    managedCefBrowserAdapter.WasResized();
+
+                    if (IsBrowserInitialized)
+                    {
+                        browser.GetHost().WasResized();
+                    }
                 }
             }
         }
@@ -269,7 +275,11 @@ namespace CefSharp.OffScreen
         {
             Address = url;
 
-            this.GetMainFrame().LoadUrl(url);
+            //Destroy the frame wrapper when we're done
+            using (var frame = this.GetMainFrame())
+            {
+                frame.LoadUrl(url);
+            }
         }
 
         public void RegisterJsObject(string name, object objectToBind, bool camelCaseJavascriptNames = true)
@@ -310,7 +320,7 @@ namespace CefSharp.OffScreen
         {
             this.ThrowExceptionIfBrowserNotInitialized();
 
-            return managedCefBrowserAdapter.GetBrowser();
+            return browser;
         }
 
         ScreenInfo IRenderWebBrowser.GetScreenInfo()
@@ -419,8 +429,10 @@ namespace CefSharp.OffScreen
             }
         }
 
-        void IWebBrowserInternal.OnAfterBrowserCreated()
+        void IWebBrowserInternal.OnAfterBrowserCreated(IBrowser browser)
         {
+            this.browser = browser;
+
             IsBrowserInitialized = true;
 
             var handler = BrowserInitialized;

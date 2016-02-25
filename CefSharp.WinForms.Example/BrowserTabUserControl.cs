@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -8,6 +8,8 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using CefSharp.WinForms.Example.Handlers;
 using CefSharp.WinForms.Internals;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CefSharp.WinForms.Example
 {
@@ -45,6 +47,14 @@ namespace CefSharp.WinForms.Example
             browser.DragHandler = new DragHandler();
             browser.RegisterJsObject("bound", new BoundObject());
             browser.RegisterAsyncJsObject("boundAsync", new AsyncBoundObject());
+            browser.RenderProcessMessageHandler = new RenderProcessMessageHandler();
+            //browser.ResourceHandlerFactory = new FlashResourceHandlerFactory();
+
+            var eventObject = new ScriptedMethodsBoundObject();
+            eventObject.EventArrived += OnJavascriptEventArrived;
+            // Use the default of camelCaseJavascriptNames
+            // .Net methods starting with a capitol will be translated to starting with a lower case letter when called from js
+            browser.RegisterJsObject("boundEvent", eventObject, camelCaseJavascriptNames:true);
 
             CefExample.RegisterTestResources(browser);
 
@@ -85,6 +95,25 @@ namespace CefSharp.WinForms.Example
             this.InvokeOnUiThreadIfRequired(() => urlTextBox.Text = args.Address);
         }
 
+        private static void OnJavascriptEventArrived(string eventName, object eventData)
+        {
+            switch (eventName)
+            {
+                case "click":
+                {
+                    var message = eventData.ToString();
+                    var dataDictionary = eventData as Dictionary<string, object>;
+                    if (dataDictionary != null)
+                    {
+                        var result = string.Join(", ", dataDictionary.Select(pair => pair.Key + "=" + pair.Value));
+                        message = "event data: " + result;
+                    }
+                    MessageBox.Show(message, "Javascript event arrived", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    break;
+                }
+            }
+        }
+
         private void SetCanGoBack(bool canGoBack)
         {
             this.InvokeOnUiThreadIfRequired(() => backButton.Enabled = canGoBack);
@@ -115,6 +144,19 @@ namespace CefSharp.WinForms.Example
         {
             if (args.IsBrowserInitialized)
             {
+                //Get the underlying browser host wrapper
+                var browserHost = Browser.GetBrowser().GetHost();
+                var requestContext = browserHost.RequestContext;
+                string errorMessage;
+                // Browser must be initialized before getting/setting preferences
+                var success = requestContext.SetPreference("enable_do_not_track", true, out errorMessage);
+                if(!success)
+                {
+                    this.InvokeOnUiThreadIfRequired(() => MessageBox.Show("Unable to set preference enable_do_not_track errorMessage: " + errorMessage));
+                }
+                var preferences = requestContext.GetAllPreferences(true);
+                var doNotTrack = (bool)preferences["enable_do_not_track"];
+                
                 ChromeWidgetMessageInterceptor.SetupLoop((ChromiumWebBrowser)Browser, (message) =>
                 {
                     const int WM_MOUSEACTIVATE = 0x0021;
@@ -150,19 +192,7 @@ namespace CefSharp.WinForms.Example
             }
         }
 
-        public void ExecuteScript(string script)
-        {
-            Browser.ExecuteScriptAsync(script);
-        }
-
-        public object EvaluateScript(string script)
-        {
-            var task = Browser.EvaluateScriptAsync(script);
-            task.Wait();
-            return task.Result;
-        }
-
-        public void DisplayOutput(string output)
+        private void DisplayOutput(string output)
         {
             this.InvokeOnUiThreadIfRequired(() => outputLabel.Text = output);
         }

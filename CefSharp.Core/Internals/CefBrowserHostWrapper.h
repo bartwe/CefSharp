@@ -1,4 +1,4 @@
-// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -46,6 +46,13 @@ namespace CefSharp
             virtual Task<double>^ GetZoomLevelAsync();
             virtual IntPtr GetWindowHandle();
             virtual void CloseBrowser(bool forceClose);
+
+            virtual void DragTargetDragEnter(IDragData^ dragData, MouseEvent^ mouseEvent, DragOperationsMask allowedOperations);
+            virtual void DragTargetDragOver(MouseEvent^ mouseEvent, DragOperationsMask allowedOperations);
+            virtual void DragTargetDragDrop(MouseEvent^ mouseEvent);
+            virtual void DragSourceEndedAt(int x, int y, DragOperationsMask op);
+            virtual void DragTargetDragLeave();
+            virtual void DragSourceSystemDragEnded();
         
             virtual void ShowDevTools(IWindowInfo^ windowInfo, int inspectElementAtX, int inspectElementAtY);
             virtual void CloseDevTools();
@@ -59,6 +66,7 @@ namespace CefSharp
             virtual void SetFocus(bool focus);
             virtual void SendFocusEvent(bool setFocus);
             virtual void SendKeyEvent(KeyEvent keyEvent);
+            virtual void SendKeyEvent(int message, int wParam, int lParam);
 
             virtual void SendMouseWheelEvent(int x, int y, int deltaX, int deltaY, CefEventFlags modifiers);
 
@@ -68,10 +76,48 @@ namespace CefSharp
 
             virtual void SendMouseMoveEvent(int x, int y, bool mouseLeave, CefEventFlags modifiers);
 
+            virtual void NotifyMoveOrResizeStarted();
+
+            virtual void NotifyScreenInfoChanged();
+
+            virtual void WasResized();
+
+            virtual void WasHidden(bool hidden);
+
             virtual property int WindowlessFrameRate
             {
                 int get();
                 void set(int val);
+            }
+
+            virtual property bool MouseCursorChangeDisabled
+            {
+                bool get();
+                void set(bool val);
+            }
+
+            virtual property bool WindowRenderingDisabled
+            {
+                bool get();
+            }
+
+            virtual IntPtr GetOpenerWindowHandle();
+
+            virtual void SendCaptureLostEvent();
+
+            virtual property IRequestContext^ RequestContext
+            {
+                IRequestContext^ get();
+            }
+
+            // Misc. private functions:
+            CefMouseEvent GetCefMouseEvent(MouseEvent^ mouseEvent);
+            int GetCefKeyboardModifiers(WPARAM wparam, LPARAM lparam);
+
+            // Private keyboard functions:
+            bool IsKeyDown(WPARAM wparam)
+            {
+                return (GetKeyState(wparam) & 0x8000) != 0;
             }
         };
     }

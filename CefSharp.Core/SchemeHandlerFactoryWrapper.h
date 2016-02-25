@@ -1,4 +1,4 @@
-// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -33,21 +33,11 @@ namespace CefSharp
 
         virtual CefRefPtr<CefResourceHandler> Create(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& schemeName, CefRefPtr<CefRequest> request) OVERRIDE
         {
-            auto browserWrapper = gcnew CefSharpBrowserWrapper(browser);
-            auto frameWrapper = gcnew CefFrameWrapper(frame);
-            auto requestWrapper = gcnew CefRequestWrapper(request);
+            CefSharpBrowserWrapper browserWrapper(browser);
+            CefFrameWrapper frameWrapper(frame);
+            CefRequestWrapper requestWrapper(request);
 
-            auto handler = _factory->Create(browserWrapper, frameWrapper, StringUtils::ToClr(schemeName), requestWrapper);
-
-            if (handler == nullptr)
-            {
-                // Clean up our disposables if our factory doesn't want
-                // this request.
-                delete browserWrapper;
-                delete frameWrapper;
-                delete requestWrapper;
-                return NULL;
-            }
+            auto handler = _factory->Create(%browserWrapper, %frameWrapper, StringUtils::ToClr(schemeName), %requestWrapper);
 
             if (handler->GetType() == ResourceHandler::typeid)
             {
@@ -58,7 +48,7 @@ namespace CefSharp
                 }
             }
 
-            return new ResourceHandlerWrapper(handler, browserWrapper, frameWrapper, requestWrapper);
+            return new ResourceHandlerWrapper(handler);
         }
 
         IMPLEMENT_REFCOUNTING(SchemeHandlerFactoryWrapper);

@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -15,13 +15,9 @@ namespace CefSharp
     public class ResourceHandlerWrapper : public CefResourceHandler
     {
     private:
-        gcroot<IRequest^> _request;
         gcroot<IResourceHandler^> _handler;
-        gcroot<Stream^> _stream;
-        gcroot<IBrowser^> _browser;
-        gcroot<IFrame^> _frame;
 
-        int64 SizeFromStream();
+        Cookie^ GetCookie(const CefCookie& cookie);
 
     public:
 
@@ -30,18 +26,14 @@ namespace CefSharp
         /// lifetime management container  (i.e. calling .Dispose at the correct time) on 
         /// managed objects that contain MCefRefPtrs.
         /// </summary>
-        ResourceHandlerWrapper(IResourceHandler^ handler, IBrowser ^browser, IFrame^ frame, IRequest^ request)
-            : _handler(handler), _browser(browser), _frame(frame), _request(request)
+        ResourceHandlerWrapper(IResourceHandler^ handler)
+            : _handler(handler)
         {
         }
 
         ~ResourceHandlerWrapper()
         {
             _handler = nullptr;
-            _stream = nullptr;
-            delete _request;
-            delete _browser;
-            delete _frame;
         }
 
         virtual bool ProcessRequest(CefRefPtr<CefRequest> request, CefRefPtr<CefCallback> callback) OVERRIDE;

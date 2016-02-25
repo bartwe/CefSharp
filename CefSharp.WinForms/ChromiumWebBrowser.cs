@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -14,6 +14,7 @@ namespace CefSharp.WinForms
         private ManagedCefBrowserAdapter managedCefBrowserAdapter;
         private ParentFormMessageInterceptor parentFormMessageInterceptor;
         private IntPtr controlHandle;
+        private IBrowser browser;
 
         /// <summary>
         /// Set to true while handing an activating WM_ACTIVATE message.
@@ -36,6 +37,7 @@ namespace CefSharp.WinForms
         public ILifeSpanHandler LifeSpanHandler { get; set; }
         public IDisplayHandler DisplayHandler { get; set; }
         public IContextMenuHandler MenuHandler { get; set; }
+        public IRenderProcessMessageHandler RenderProcessMessageHandler { get; set; }
 
         /// <summary>
         /// The <see cref="IFocusHandler"/> for this ChromiumWebBrowser.
@@ -107,6 +109,7 @@ namespace CefSharp.WinForms
 
             if (disposing)
             {
+                browser = null;
                 IsBrowserInitialized = false;
 
                 if (BrowserSettings != null)
@@ -189,8 +192,9 @@ namespace CefSharp.WinForms
             base.OnHandleCreated(e);
         }
 
-        void IWebBrowserInternal.OnAfterBrowserCreated()
+        void IWebBrowserInternal.OnAfterBrowserCreated(IBrowser browser)
         {
+            this.browser = browser;
             IsBrowserInitialized = true;
 
             // By the time this callback gets called, this control
@@ -346,38 +350,21 @@ namespace CefSharp.WinForms
             }
         }
 
-        public void NotifyMoveOrResizeStarted()
-        {
-            this.ThrowExceptionIfBrowserNotInitialized();
-
-            managedCefBrowserAdapter.NotifyMoveOrResizeStarted();
-        }
-
         protected override void OnGotFocus(EventArgs e)
         {
             if (IsBrowserInitialized)
             {
-                SetFocus(true);
+                browser.GetHost().SetFocus(true);
             }
 
             base.OnGotFocus(e);
-        }
-
-        /// <summary>
-        /// Tell the browser to acquire/release focus.
-        /// </summary>
-        public void SetFocus(bool isFocused)
-        {
-            this.ThrowExceptionIfBrowserNotInitialized();
-
-            managedCefBrowserAdapter.SetFocus(isFocused);
         }
 
         public IBrowser GetBrowser()
         {
             this.ThrowExceptionIfBrowserNotInitialized();
 
-            return managedCefBrowserAdapter.GetBrowser();
+            return browser;
         }
     }
 }

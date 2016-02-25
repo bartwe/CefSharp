@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -22,9 +22,7 @@ namespace CefSharp
             CefResponseWrapper(CefRefPtr<CefResponse> &response) :
                 _response(response)
             {
-                StatusCode = 200;
-                StatusText = "OK";
-                MimeType = "text/html";
+                
             }
 
             !CefResponseWrapper()
@@ -44,10 +42,14 @@ namespace CefSharp
             {
                 int get()
                 {
+                    ThrowIfDisposed();
+
                     return _response->GetStatus();
                 }
                 void set(int val)
                 {
+                    ThrowIfDisposed();
+
                     _response->SetStatus(val);
                 }
             }
@@ -56,10 +58,14 @@ namespace CefSharp
             {
                 String^ get()
                 {
+                    ThrowIfDisposed();
+
                     return StringUtils::ToClr(_response->GetStatusText());
                 }
                 void set(String^ val)
                 {
+                    ThrowIfDisposed();
+
                     _response->SetStatusText(StringUtils::ToNative(val));
                 }
             }
@@ -68,10 +74,14 @@ namespace CefSharp
             {
                 String^ get()
                 {
+                    ThrowIfDisposed();
+
                     return StringUtils::ToClr(_response->GetMimeType());
                 }
                 void set(String^ val)
                 {
+                    ThrowIfDisposed();
+
                     _response->SetMimeType(StringUtils::ToNative(val));
                 }
             }
@@ -80,6 +90,8 @@ namespace CefSharp
             {
                 NameValueCollection^ get()
                 {
+                    ThrowIfDisposed();
+
                     //TODO: Extract this code out as it's duplicated in CefRequestWrapper
                     CefRequest::HeaderMap hm;
                     _response->GetHeaderMap(hm);
@@ -97,6 +109,8 @@ namespace CefSharp
                 }
                 void set(NameValueCollection^ headers)
                 {
+                    ThrowIfDisposed();
+
                     _response->SetHeaderMap(TypeConversion::ToNative(headers));
                 }
             }
