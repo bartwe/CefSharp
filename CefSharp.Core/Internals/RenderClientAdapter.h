@@ -120,23 +120,23 @@ namespace CefSharp
 
                 lock l(bitmapInfo->BitmapLock);
 
-				CefDirtyRect rect = CefDirtyRect(0, 0, 0, 0);
+                CefDirtyRect rect = CefDirtyRect(0, 0, 0, 0);
 
                 if(bitmapInfo->DirtyRectSupport)
                 {
                     //NOTE: According to https://bitbucket.org/chromiumembedded/branches-2171-cef3/commits/ce984ddff3268a50cf9967487327e1257015b98c
                     // There is only one rect now that's a union of all dirty regions. API Still passes in a vector
 
-					for(auto const& r: dirtyRects) {
-	                     rect = rect.Combine(CefDirtyRect(r.x, r.y, r.width, r.height));
-					}
+                    for(auto const& r: dirtyRects) {
+                        rect = rect.Combine(CefDirtyRect(r.x, r.y, r.width, r.height));
+                    }
                 }
-				else
-				{
-					rect = CefDirtyRect(0, 0, width, height);
-				}
+                else
+                {
+                    rect = CefDirtyRect(0, 0, width, height);
+                }
 				
-				auto backBufferHandle = (HANDLE)bitmapInfo->BackBufferHandle;
+                auto backBufferHandle = (HANDLE)bitmapInfo->BackBufferHandle;
 
                 if (backBufferHandle == NULL || bitmapInfo->Width != width || bitmapInfo->Height != height)
                 {
@@ -173,20 +173,19 @@ namespace CefSharp
                     bitmapInfo->Height = height;
                     bitmapInfo->NumberOfBytes = numberOfBytes;
 
-					rect = CefDirtyRect(0, 0, width, height);
-					bitmapInfo->DirtyRect = CefDirtyRect(0, 0, width, height);
+                    rect = CefDirtyRect(0, 0, width, height);
+                    bitmapInfo->DirtyRect = CefDirtyRect(0, 0, width, height);
                 }               
 
                 if ((rect.Width != 0) && (rect.Height != 0))
-	           {
-					// If pixels have changed, copy them over.
-					
-					int offset = bitmapInfo->BytesPerPixel * rect.Y * width;
-					int count = bitmapInfo->BytesPerPixel * rect.Height * width;
-					CopyMemory(((char*)backBufferHandle) + offset, ((char*)buffer) + offset, count);
+                {
+                    // If pixels have changed, copy them over.
+                    int offset = bitmapInfo->BytesPerPixel * rect.Y * width;
+                    int count = bitmapInfo->BytesPerPixel * rect.Height * width;
+                    CopyMemory(((uint8_t*)backBufferHandle) + offset, ((uint8_t*)buffer) + offset, count);
                 }
 
-				bitmapInfo->DirtyRect = bitmapInfo->DirtyRect.Combine(rect);
+                bitmapInfo->DirtyRect = bitmapInfo->DirtyRect.Combine(rect);
 
                 _renderWebBrowser->InvokeRenderAsync(bitmapInfo);
             };
