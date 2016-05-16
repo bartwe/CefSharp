@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(SolutionDir)\packages\cef.sdk.3.2526.1362\build\cef.sdk.props" Condition="Exists('$(SolutionDir)\packages\cef.sdk.3.2526.1362\build\cef.sdk.props')" />
+  <Import Project="$(SolutionDir)\packages\cef.sdk.3.2623.1401\build\cef.sdk.props" Condition="Exists('$(SolutionDir)\packages\cef.sdk.3.2623.1401\build\cef.sdk.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -66,11 +66,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>11.0.51106.1</_ProjectFileVersion>
-    <NuGetPackageImportStamp>a1be94e9</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>249933d4</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>bin\$(Configuration)\</OutDir>
-    <IntDir>obj\$(Configuration)\</IntDir>
+    <OutDir>bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
     <LinkIncremental>false</LinkIncremental>
     <LinkKeyFile>..\CefSharp.snk</LinkKeyFile>
@@ -87,16 +87,18 @@
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
     <TargetName>CefSharp.Core</TargetName>
+    <OutDir>bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>bin\$(Platform)\$(Configuration)\</OutDir>
     <LinkIncremental>false</LinkIncremental>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
     <TargetName>CefSharp.Core</TargetName>
     <LinkKeyFile>..\CefSharp.snk</LinkKeyFile>
-    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -105,6 +107,8 @@
     <CodeAnalysisRuleAssemblies />
     <TargetName>CefSharp.Core</TargetName>
     <LinkKeyFile>..\CefSharp.snk</LinkKeyFile>
+    <OutDir>bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -262,6 +266,7 @@
     <ClInclude Include="Internals\CefPdfPrintCallbackWrapper.h" />
     <ClInclude Include="Internals\CefPostDataElementWrapper.h" />
     <ClInclude Include="Internals\CefPostDataWrapper.h" />
+    <ClInclude Include="Internals\CefResolveCallbackAdapter.h" />
     <ClInclude Include="Internals\CefResponseFilterAdapter.h" />
     <ClInclude Include="Internals\CefResponseWrapper.h" />
     <ClInclude Include="Internals\CefRunContextMenuCallbackWrapper.h" />
@@ -270,6 +275,7 @@
     <ClInclude Include="Internals\CefTaskScheduler.h" />
     <ClInclude Include="Internals\CefTaskWrapper.h" />
     <ClInclude Include="Internals\CefWrapper.h" />
+    <ClInclude Include="PopupFeatures.h" />
     <ClInclude Include="RequestContextHandler.h" />
     <ClInclude Include="WindowInfo.h" />
     <ClInclude Include="Internals\CefCompletionCallbackAdapter.h" />

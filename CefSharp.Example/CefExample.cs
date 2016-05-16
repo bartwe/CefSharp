@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CefSharp.Example.Properties;
 using CefSharp.Example.Proxy;
+using CefSharp.Internals;
 
 namespace CefSharp.Example
 {
@@ -52,6 +53,10 @@ namespace CefSharp.Example
             //settings.CefCommandLineArgs.Add("debug-plugin-loading", "1"); //Dumps extra logging about plugin loading to the log file.
             //settings.CefCommandLineArgs.Add("disable-plugins-discovery", "1"); //Disable discovering third-party plugins. Effectively loading only ones shipped with the browser plus third-party ones as specified by --extra-plugin-dir and --load-plugin switches
             //settings.CefCommandLineArgs.Add("enable-system-flash", "1"); //Automatically discovered and load a system-wide installation of Pepper Flash.
+            //settings.CefCommandLineArgs.Add("allow-running-insecure-content", "1"); //By default, an https page cannot run JavaScript, CSS or plugins from http URLs. This provides an override to get the old insecure behavior. Only available in 47 and above.
+
+            //settings.CefCommandLineArgs.Add("enable-logging", "1"); //Enable Logging for the Renderer process (will open with a cmd prompt and output debug messages - use in conjunction with setting LogSeverity = LogSeverity.Verbose;)
+            //settings.LogSeverity = LogSeverity.Verbose; // Needed for enable-logging to output messages
 
             //settings.CefCommandLineArgs.Add("disable-extensions", "1"); //Extension support can be disabled
             //settings.CefCommandLineArgs.Add("disable-pdf-extension", "1"); //The PDF extension specifically can be disabled
@@ -88,7 +93,13 @@ namespace CefSharp.Example
                 // https://bitbucket.org/chromiumembedded/cef/issues/1689
                 //settings.CefCommandLineArgs.Add("disable-surfaces", "1");
                 settings.EnableInternalPdfViewerOffScreen();
-                settings.CefCommandLineArgs.Add("enable-begin-frame-scheduling", "1");
+                
+                // DevTools doesn't seem to be working when this is enabled
+                // http://magpcss.org/ceforum/viewtopic.php?f=6&t=14095
+                //settings.CefCommandLineArgs.Add("enable-begin-frame-scheduling", "1");
+
+                // Disable GPU in WPF and Offscreen examples until #1634 has been resolved
+                settings.CefCommandLineArgs.Add("disable-gpu", "1");
             }
 
             var proxy = ProxyConfig.GetProxyInformation();
@@ -136,11 +147,21 @@ namespace CefSharp.Example
 
             settings.FocusedNodeChangedEnabled = true;
 
+            //The Request Context has been initialized, you can now set preferences, like proxy server settings
             Cef.OnContextInitialized = delegate
             {
                 var cookieManager = Cef.GetGlobalCookieManager();
                 cookieManager.SetStoragePath("cookies", true);
                 cookieManager.SetSupportedSchemes("custom");
+
+                //Dispose of context when finished - preferable not to keep a reference if possible.
+                using (var context = Cef.GetGlobalRequestContext())
+                {
+                    string errorMessage;
+                    //You can set most preferences using a `.` notation rather than having to create a complex set of dictionaries.
+                    //The default is true, you can change to false to disable
+                    context.SetPreference("webkit.webprefs.plugins_enabled", true, out errorMessage);
+                }
             };
 
             if (!Cef.Initialize(settings, shutdownOnProcessExit: true, performDependencyCheck: !DebuggingSubProcess))
