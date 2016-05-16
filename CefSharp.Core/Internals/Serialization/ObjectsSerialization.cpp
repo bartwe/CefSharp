@@ -1,4 +1,4 @@
-// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -87,9 +87,6 @@ namespace CefSharp
                 }
                 return DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(epoch).ToLocalTime();
             }
-
-            template Object^ DeserializeObject(const CefRefPtr<CefListValue>& list, int index, IJavascriptCallbackFactory^ javascriptCallbackFactory);
-            template Object^ DeserializeObject(const CefRefPtr<CefDictionaryValue>& list, CefString index, IJavascriptCallbackFactory^ javascriptCallbackFactory);
         }
     }
 }

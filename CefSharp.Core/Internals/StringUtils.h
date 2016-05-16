@@ -1,12 +1,13 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
 #pragma once
 
 #include <vector>
+#include <sstream>
 #include "vcclr_local.h"
-#include "include\internal\cef_string.h"
+#include "include\cef_v8.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -116,6 +117,24 @@ namespace CefSharp
                     pin_ptr<const wchar_t> pStr = PtrToStringChars(str);
                     cef_string_copy(pStr, str->Length, &cefStr);
                 }
+            }
+
+            /// <summary>
+            /// Creates a detailed expection string from a provided Cef V8 exception.
+            /// </summary>
+            /// <param name="exception">The exception which will be used as base for the message</param>
+            [DebuggerStepThrough]
+            static CefString CreateExceptionString(CefRefPtr<CefV8Exception> exception)
+            {
+                if (exception.get())
+                {
+                    std::wstringstream logMessageBuilder;
+                    logMessageBuilder << exception->GetMessage().c_str() << L"\n@ " <<
+                        exception->GetScriptResourceName().c_str() << L":" << exception->GetLineNumber() << L":" << exception->GetStartColumn();
+                    return CefString(logMessageBuilder.str());
+                }
+                
+                return "Exception occured but the Cef V8 exception is null";
             }
         };
     }

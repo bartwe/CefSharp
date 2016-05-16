@@ -1,10 +1,12 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
+using System;
+
 namespace CefSharp
 {
-    public interface IRunContextMenuCallback
+    public interface IRunContextMenuCallback : IDisposable
     {
         /// <summary>
         /// Complete context menu display by selecting the specified commandId and eventFlags;
@@ -17,5 +19,10 @@ namespace CefSharp
         /// Cancel context menu display.
         /// </summary>
         void Cancel();
+
+        /// <summary>
+        /// Gets a value indicating whether the callback has been disposed of.
+        /// </summary>
+        bool IsDisposed { get; }
     }
 }

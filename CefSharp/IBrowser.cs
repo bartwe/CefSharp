@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -15,7 +15,7 @@ namespace CefSharp
         /// <summary>
         /// Returns the browser host object. This method can only be called in the browser process.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>the browser host object</returns>
         IBrowserHost GetHost();
 
         /// <summary>
@@ -58,7 +58,10 @@ namespace CefSharp
         /// <summary>
         /// Reload the current page.
         /// </summary>
-        /// <param name="ignoreCache"></param>
+        /// <param name="ignoreCache">
+        /// <c>true</c> a reload is performed ignoring browser cache; <c>false</c> a reload is
+        /// performed using files from the browser cache, if available.
+        /// </param>
         void Reload(bool ignoreCache = false);
 
         /// <summary>
@@ -115,7 +118,7 @@ namespace CefSharp
         /// <summary>
         /// Returns the number of frames that currently exist.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>the number of frames</returns>
         int GetFrameCount();
 
         /// <summary>

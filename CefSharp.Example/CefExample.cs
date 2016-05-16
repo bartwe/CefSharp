@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CefSharp.Example.Properties;
 using CefSharp.Example.Proxy;
+using CefSharp.Internals;
 
 namespace CefSharp.Example
 {
@@ -18,6 +19,7 @@ namespace CefSharp.Example
         public const string PluginsTestUrl = "custom://cefsharp/plugins.html";
         public const string PopupTestUrl = "custom://cefsharp/PopupTest.html";
         public const string BasicSchemeTestUrl = "custom://cefsharp/SchemeTest.html";
+        public const string ResponseFilterTestUrl = "custom://cefsharp/ResponseFilterTest.html";
         public const string TestResourceUrl = "http://test/resource/load";
         public const string RenderProcessCrashedUrl = "http://processcrashed";
         public const string TestUnicodeResourceUrl = "http://test/resource/loadUnicode";
@@ -27,7 +29,7 @@ namespace CefSharp.Example
         private static readonly bool DebuggingSubProcess = Debugger.IsAttached;
         private static string PluginInformation = "";
 
-        public static void Init(bool osr)
+        public static void Init(bool osr, bool multiThreadedMessageLoop)
         {
             // Set Google API keys, used for Geolocation requests sans GPS.  See http://www.chromium.org/developers/how-tos/api-keys
             // Environment.SetEnvironmentVariable("GOOGLE_API_KEY", "");
@@ -51,9 +53,17 @@ namespace CefSharp.Example
             //settings.CefCommandLineArgs.Add("debug-plugin-loading", "1"); //Dumps extra logging about plugin loading to the log file.
             //settings.CefCommandLineArgs.Add("disable-plugins-discovery", "1"); //Disable discovering third-party plugins. Effectively loading only ones shipped with the browser plus third-party ones as specified by --extra-plugin-dir and --load-plugin switches
             //settings.CefCommandLineArgs.Add("enable-system-flash", "1"); //Automatically discovered and load a system-wide installation of Pepper Flash.
+            //settings.CefCommandLineArgs.Add("allow-running-insecure-content", "1"); //By default, an https page cannot run JavaScript, CSS or plugins from http URLs. This provides an override to get the old insecure behavior. Only available in 47 and above.
 
-            //settings.CefCommandLineArgs.Add("ppapi-flash-path", @"C:\WINDOWS\SysWOW64\Macromed\Flash\pepflashplayer32_18_0_0_209.dll"); //Load a specific pepper flash version (Step 1 of 2)
-            //settings.CefCommandLineArgs.Add("ppapi-flash-version", "18.0.0.209"); //Load a specific pepper flash version (Step 2 of 2)
+            //settings.CefCommandLineArgs.Add("enable-logging", "1"); //Enable Logging for the Renderer process (will open with a cmd prompt and output debug messages - use in conjunction with setting LogSeverity = LogSeverity.Verbose;)
+            //settings.LogSeverity = LogSeverity.Verbose; // Needed for enable-logging to output messages
+
+            //settings.CefCommandLineArgs.Add("disable-extensions", "1"); //Extension support can be disabled
+            //settings.CefCommandLineArgs.Add("disable-pdf-extension", "1"); //The PDF extension specifically can be disabled
+
+            //Load the pepper flash player that comes with Google Chrome - may be possible to load these values from the registry and query the dll for it's version info (Step 2 not strictly required it seems)
+            //settings.CefCommandLineArgs.Add("ppapi-flash-path", @"C:\Program Files (x86)\Google\Chrome\Application\47.0.2526.106\PepperFlash\pepflashplayer.dll"); //Load a specific pepper flash version (Step 1 of 2)
+            //settings.CefCommandLineArgs.Add("ppapi-flash-version", "20.0.0.228"); //Load a specific pepper flash version (Step 2 of 2)
 
             //NOTE: For OSR best performance you should run with GPU disabled:
             // `--disable-gpu --disable-gpu-compositing --enable-begin-frame-scheduling`
@@ -73,6 +83,8 @@ namespace CefSharp.Example
             //Possibly useful when experiencing blury fonts.
             //settings.CefCommandLineArgs.Add("disable-direct-write", "1");
 
+            settings.MultiThreadedMessageLoop = multiThreadedMessageLoop;
+
             // Off Screen rendering (WPF/Offscreen)
             if(osr)
             {
@@ -81,7 +93,13 @@ namespace CefSharp.Example
                 // https://bitbucket.org/chromiumembedded/cef/issues/1689
                 //settings.CefCommandLineArgs.Add("disable-surfaces", "1");
                 settings.EnableInternalPdfViewerOffScreen();
-                settings.CefCommandLineArgs.Add("enable-begin-frame-scheduling", "1");
+                
+                // DevTools doesn't seem to be working when this is enabled
+                // http://magpcss.org/ceforum/viewtopic.php?f=6&t=14095
+                //settings.CefCommandLineArgs.Add("enable-begin-frame-scheduling", "1");
+
+                // Disable GPU in WPF and Offscreen examples until #1634 has been resolved
+                settings.CefCommandLineArgs.Add("disable-gpu", "1");
             }
 
             var proxy = ProxyConfig.GetProxyInformation();
@@ -105,7 +123,7 @@ namespace CefSharp.Example
                 }
             }
             
-            settings.LogSeverity = LogSeverity.Verbose;
+            //settings.LogSeverity = LogSeverity.Verbose;
 
             if (DebuggingSubProcess)
             {
@@ -127,11 +145,23 @@ namespace CefSharp.Example
 
             settings.RegisterExtension(new CefExtension("cefsharp/example", Resources.extension));
 
+            settings.FocusedNodeChangedEnabled = true;
+
+            //The Request Context has been initialized, you can now set preferences, like proxy server settings
             Cef.OnContextInitialized = delegate
             {
                 var cookieManager = Cef.GetGlobalCookieManager();
                 cookieManager.SetStoragePath("cookies", true);
                 cookieManager.SetSupportedSchemes("custom");
+
+                //Dispose of context when finished - preferable not to keep a reference if possible.
+                using (var context = Cef.GetGlobalRequestContext())
+                {
+                    string errorMessage;
+                    //You can set most preferences using a `.` notation rather than having to create a complex set of dictionaries.
+                    //The default is true, you can change to false to disable
+                    context.SetPreference("webkit.webprefs.plugins_enabled", true, out errorMessage);
+                }
             };
 
             if (!Cef.Initialize(settings, shutdownOnProcessExit: true, performDependencyCheck: !DebuggingSubProcess))

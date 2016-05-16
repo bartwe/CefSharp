@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -37,6 +37,17 @@ namespace CefSharp
         SpellCheckLastSuggestion = 204,
         SpellCheckNoSuggestions = 205,
         AddToDictionary = 206,
+
+        /// <summary>
+        /// Custom menu items originating from the renderer process. For example, plugin placeholder menu items or Flash menu items.
+        /// This is the first entry
+        /// </summary>
+        CustomFirst = 220,
+        /// <summary>
+        /// Custom menu items originating from the renderer process. For example, plugin placeholder menu items or Flash menu items.
+        /// This is the last entry
+        /// </summary>
+        CustomLast = 250,
 
         // All user-defined menu IDs should come between MENU_ID_USER_FIRST and
         // MENU_ID_USER_LAST to avoid overlapping the Chromium and CEF ID ranges

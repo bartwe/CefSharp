@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -97,7 +97,7 @@ namespace CefSharp
         /// <param name="checkOptional">check to see if optional dependencies are present</param>
         /// <param name="packLoadingDisabled">Is loading of pack files disabled?</param>
         /// <param name="path">path to check for dependencies</param>
-        /// <param name="resourcesDirPath"></param>
+        /// <param name="resourcesDirPath">The path to the resources directory, if empty the Executing Assembly path is used.</param>
         /// <param name="browserSubProcessPath">The path to a separate executable that will be launched for sub-processes.</param>
         /// <param name="localePackFile">The locale pack file e.g. <see cref="LocalesPackFile"/> </param>
         /// <returns>List of missing dependencies, if all present an empty List will be returned</returns>
@@ -151,7 +151,7 @@ namespace CefSharp
         /// </summary>
         /// <param name="dir">The directory of the dependencies, or the current directory if null.</param>
         /// <param name="files">The dependencies to check.</param>
-        /// <returns></returns>
+        /// <returns>List of missing dependencies, if all present an empty List will be returned</returns>
         private static List<string> CheckDependencyList(string dir, IEnumerable<string> files)
         {
             var missingDependencies = new List<string>();
@@ -178,7 +178,7 @@ namespace CefSharp
         /// <param name="packLoadingDisabled">Is loading of pack files disabled?</param>
         /// <param name="browserSubProcessPath">The path to a separate executable that will be launched for sub-processes.</param>
         /// <exception cref="Exception">Throw when not all dependencies are present</exception>
-        public static void AssertAllDependenciesPresent(string locale, string localesDirPath, string resourcesDirPath, bool packLoadingDisabled, string browserSubProcessPath)
+        public static void AssertAllDependenciesPresent(string locale = null, string localesDirPath = null, string resourcesDirPath = null, bool packLoadingDisabled = false, string browserSubProcessPath = "CefSharp.BrowserSubProcess.exe")
         {
             var executingAssembly = Assembly.GetExecutingAssembly();
 

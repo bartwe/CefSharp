@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -17,7 +17,7 @@ namespace CefSharp
         /// <param name="messageText">Message Text</param>
         /// <param name="defaultPromptText">value will be specified for prompt dialogs only</param>
         /// <param name="callback">Callback can be executed inline or in an async fashion</param>
-        /// <param name="suppressMessage">Set |suppress_message| to true and return false to suppress the message (suppressing messages is preferable to immediately executing the callback as this is used to detect presumably malicious behavior like spamming alert messages in onbeforeunload). Set |suppress_message| to false and return false to use the default implementation (the default implementation will show one modal dialog at a time and suppress any additional dialog requests until the displayed dialog is dismissed).</param>
+        /// <param name="suppressMessage">Set suppressMessage to true and return false to suppress the message (suppressing messages is preferable to immediately executing the callback as this is used to detect presumably malicious behavior like spamming alert messages in onbeforeunload). Set suppressMessage to false and return false to use the default implementation (the default implementation will show one modal dialog at a time and suppress any additional dialog requests until the displayed dialog is dismissed).</param>
         /// <returns>Return true if the application will use a custom dialog or if the callback has been executed immediately. Custom dialogs may be either modal or modeless. If a custom dialog is used the application must execute |callback| once the custom dialog is dismissed.</returns>
         bool OnJSDialog(IWebBrowser browserControl, IBrowser browser, string originUrl, string acceptLang, CefJsDialogType dialogType, string messageText, string defaultPromptText, IJsDialogCallback callback, ref bool suppressMessage);
         

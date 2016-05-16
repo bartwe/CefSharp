@@ -14,6 +14,7 @@
             <MenuItem Header="_File">
                 <MenuItem Header="_New Tab" Command="New"/>
                 <MenuItem Header="_Close Tab" Command="Close"/>
+                <MenuItem Header="_Open DevTools" Command="controls:CefSharpCommands.CustomCommand" CommandParameter="OpenDevTools"/>
                 <MenuItem Header="_Exit" Command="controls:CefSharpCommands.Exit"/>
             </MenuItem>
             <MenuItem Header="_Tests">
@@ -22,11 +23,13 @@
                 <MenuItem Header="_Popup Test" Command="controls:CefSharpCommands.OpenTabCommand" CommandParameter="{Binding Source={x:Static ex:CefExample.PopupParentUrl}}"/>
                 <MenuItem Header="_Popup Test Custom Scheme" Command="controls:CefSharpCommands.OpenTabCommand" CommandParameter="{Binding Source={x:Static ex:CefExample.PopupTestUrl}}"/>
                 <MenuItem Header="_Basic Scheme Test" Command="controls:CefSharpCommands.OpenTabCommand" CommandParameter="{Binding Source={x:Static ex:CefExample.BasicSchemeTestUrl}}"/>
+                <MenuItem Header="_Response Filter Test" Command="controls:CefSharpCommands.OpenTabCommand" CommandParameter="{Binding Source={x:Static ex:CefExample.ResponseFilterTestUrl}}"/>
                 <MenuItem Header="_Fish Gl" Command="controls:CefSharpCommands.OpenTabCommand" CommandParameter="http://www.fishgl.com/"/>
                 <MenuItem Header="_Microsoft Test Drive" Command="controls:CefSharpCommands.OpenTabCommand" CommandParameter="http://dev.modern.ie/testdrive/"/>
                 <MenuItem Header="_Drag Demo" Command="controls:CefSharpCommands.OpenTabCommand" CommandParameter="http://html5demos.com/drag"/>
                 <MenuItem Header="_Adobe Flash Demo" Command="controls:CefSharpCommands.OpenTabCommand" CommandParameter="http://www.adobe.com/software/flash/about/"/>
-                <MenuItem Header="Print Current tab to PDF" Command="controls:CefSharpCommands.PrintTabToPdfCommand" />
+                <MenuItem Header="_Print Current tab to PDF" Command="controls:CefSharpCommands.PrintTabToPdfCommand" />
+                <MenuItem Header="_Load Custom Request" Command="controls:CefSharpCommands.CustomCommand" CommandParameter="CustomRequest" />
             </MenuItem>
         </Menu>
         <controls:NonReloadingTabControl x:Name="TabControl"

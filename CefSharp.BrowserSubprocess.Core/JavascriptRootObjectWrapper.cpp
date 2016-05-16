@@ -1,4 +1,4 @@
-// Copyright © 2010-2015 The CefSharp Project. All rights reserved.
+// Copyright © 2010-2016 The CefSharp Project. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -14,6 +14,13 @@ namespace CefSharp
 {
     void JavascriptRootObjectWrapper::Bind(JavascriptRootObject^ rootObject, JavascriptRootObject^ asyncRootObject, const CefRefPtr<CefV8Value>& v8Value)
     {
+        if (_isBound)
+        {
+            throw gcnew InvalidOperationException("This root object has already been bound.");
+        }
+
+        _isBound = true;
+
         if (rootObject != nullptr)
         {
             auto memberObjects = rootObject->MemberObjects;
@@ -44,6 +51,11 @@ namespace CefSharp
     JavascriptCallbackRegistry^ JavascriptRootObjectWrapper::CallbackRegistry::get()
     {
         return _callbackRegistry;
+    }
+
+    bool JavascriptRootObjectWrapper::IsBound::get()
+    {
+        return _isBound;
     }
 
 

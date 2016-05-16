@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -21,7 +21,6 @@ namespace CefSharp
         /// <param name="mask">represents the type of drag operation</param>
         /// <returns>Return false for default drag handling behavior or true to cancel the drag event. </returns>
         bool OnDragEnter(IWebBrowser browserControl, IBrowser browser, IDragData dragData, DragOperationsMask mask);
-
 
         /// <summary>
         /// Called whenever draggable regions for the browser window change.

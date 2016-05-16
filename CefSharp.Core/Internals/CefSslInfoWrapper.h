@@ -1,4 +1,4 @@
-// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -87,6 +87,8 @@ namespace CefSharp
                 {
                     cli::array<Byte>^ get()
                     {
+                        ThrowIfDisposed();
+
                         auto serialNumber = _sslInfo->GetSerialNumber();
                         auto byteCount = serialNumber->GetSize();
                         if (byteCount == 0)
@@ -111,6 +113,8 @@ namespace CefSharp
                 {
                     Nullable<DateTime> get()
                     {
+                        ThrowIfDisposed();
+
                         return TypeConversion::FromNative(_sslInfo->GetValidStart());
                     }
                 }
@@ -123,6 +127,8 @@ namespace CefSharp
                 {
                     Nullable<DateTime> get()
                     {
+                        ThrowIfDisposed();
+
                         return TypeConversion::FromNative(_sslInfo->GetValidExpiry());
                     }
                 }
@@ -134,6 +140,8 @@ namespace CefSharp
                 {
                     cli::array<Byte>^ get()
                     {
+                        ThrowIfDisposed();
+
                         auto serialNumber = _sslInfo->GetDEREncoded();
                         auto byteCount = serialNumber->GetSize();
                         if (byteCount == 0)
@@ -157,6 +165,8 @@ namespace CefSharp
                 {
                     cli::array<Byte>^ get()
                     {
+                        ThrowIfDisposed();
+
                         auto serialNumber = _sslInfo->GetPEMEncoded();
                         auto byteCount = serialNumber->GetSize();
                         if (byteCount == 0)

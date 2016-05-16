@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -62,21 +62,24 @@ namespace CefSharp
         /// <summary>
         /// Retrieve this frame's HTML source as a string sent to the specified visitor.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// a <see cref="Task{String}"/> that when executed returns this frame's HTML source as a string.
+        /// </returns>
         Task<string> GetSourceAsync();
 
         /// <summary>
         /// Retrieve this frame's display text as a string sent to the specified visitor.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// a <see cref="Task{String}"/> that when executed returns the frame's display text as a string.
+        /// </returns>
         Task<string> GetTextAsync();
 
-        // TODO: Expose a public constructor to CefRequestWrapper maybe?
-        //
-        // Load the request represented by the |request| object.
-        //
-        /*--cef()--*/
-        //virtual void LoadRequest(CefRequestWrapper^ request) = 0;
+        /// <summary>
+        /// Load the custom request.
+        /// </summary>
+        /// <param name="request">request to be loaded in the frame</param>
+        void LoadRequest(IRequest request);
 
         /// <summary>
         /// Load the specified url.
@@ -153,5 +156,12 @@ namespace CefSharp
         /// Gets a value indicating whether the frame has been disposed of.
         /// </summary>
         bool IsDisposed { get; }
+
+        /// <summary>
+        /// Create a custom request for use with <see cref="LoadRequest"/>
+        /// </summary>
+        /// <param name="initializePostData">Initialize the PostData object when creating this request</param>
+        /// <returns>A new instance of the request</returns>
+        IRequest CreateRequest(bool initializePostData = true);
     }
 }

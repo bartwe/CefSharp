@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -144,6 +144,16 @@ namespace CefSharp
         /// Implement <see cref="IGeolocationHandler"/> and assign to handle requests for permission to use geolocation.
         /// </summary>
         IGeolocationHandler GeolocationHandler { get; set; }
+
+        /// <summary>
+        /// Implement <see cref="IRenderProcessMessageHandler"/> and assign to handle messages from the render process. 
+        /// </summary>
+        IRenderProcessMessageHandler RenderProcessMessageHandler { get; set; }
+
+        /// <summary>
+        /// Implement <see cref="IFindHandler"/> to handle events related to find results.
+        /// </summary>
+        IFindHandler FindHandler { get; set; }
 
         /// <summary>
         /// A flag that indicates whether the WebBrowser is initialized (true) or not (false).

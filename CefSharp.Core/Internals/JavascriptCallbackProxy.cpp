@@ -1,4 +1,4 @@
-// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -22,7 +22,7 @@ namespace CefSharp
             auto browser = GetBrowser();
             if (browser == nullptr)
             {
-                throw gcnew InvalidOperationException("Browser instance is null.");
+                throw gcnew InvalidOperationException("Browser instance is null. Check CanExecute before calling this method.");
             }
 
             auto browserWrapper = static_cast<CefSharpBrowserWrapper^>(browser);
@@ -31,14 +31,14 @@ namespace CefSharp
 
             auto callbackMessage = CefProcessMessage::Create(kJavascriptCallbackRequest);
             auto argList = callbackMessage->GetArgumentList();
-            SetInt64(_callback->FrameId, argList, 0);
-            SetInt64(doneCallback.Key, argList, 1);
-            SetInt64(_callback->Id, argList, 2);
+            SetInt64(argList, 0, _callback->FrameId);
+            SetInt64(argList, 1, doneCallback.Key);
+            SetInt64(argList, 2, _callback->Id);
             auto paramList = CefListValue::Create();
             for (int i = 0; i < parameters->Length; i++)
             {
                 auto param = parameters[i];
-                SerializeV8Object(param, paramList, i);
+                SerializeV8Object(paramList, i, param);
             }
             argList->SetList(3, paramList);
 
@@ -51,8 +51,8 @@ namespace CefSharp
         {
             auto result = CefProcessMessage::Create(kJavascriptCallbackDestroyRequest);
             auto argList = result->GetArgumentList();
-            SetInt64(_callback->Id, argList, 0);
-            SetInt64(_callback->FrameId, argList, 1);
+            SetInt64(argList, 0, _callback->Id);
+            SetInt64(argList, 1, _callback->FrameId);
             return result;
         }
 
@@ -61,8 +61,11 @@ namespace CefSharp
             IBrowser^ result = nullptr;
             if (_browserAdapter->IsAlive)
             {
-                auto browserAdapter = static_cast<ManagedCefBrowserAdapter^>(_browserAdapter->Target);
-                result = browserAdapter->GetBrowser(_callback->BrowserId);
+                auto browserAdapter = static_cast<IBrowserAdapter^>(_browserAdapter->Target);
+                if (!browserAdapter->IsDisposed)
+                {
+                    result = browserAdapter->GetBrowser(_callback->BrowserId);
+                }
             }
             return result;
         }
@@ -70,6 +73,18 @@ namespace CefSharp
         bool JavascriptCallbackProxy::IsDisposed::get()
         {
             return _disposed;
+        }
+
+        bool JavascriptCallbackProxy::CanExecute::get()
+        {
+            if (_disposed)
+            {
+                return false;
+            }
+            
+            auto browser = GetBrowser();
+
+            return browser != nullptr;
         }
 
         void JavascriptCallbackProxy::DisposedGuard()

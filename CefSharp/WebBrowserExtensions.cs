@@ -1,9 +1,10 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
 using System;
 using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 using CefSharp.Internals;
 
@@ -11,6 +12,8 @@ namespace CefSharp
 {
     public static class WebBrowserExtensions
     {
+        private static Type[] numberTypes = new Type[] { typeof(int), typeof(uint), typeof(double), typeof(decimal), typeof(float), typeof(Int64), typeof(Int16) };
+
         /// <summary>
         /// Returns the main (top-level) frame for the browser window.
         /// </summary>
@@ -183,6 +186,59 @@ namespace CefSharp
         /// <summary>
         /// Execute some Javascript code in the context of this WebBrowser. As the method name implies, the script will be
         /// executed asynchronously, and the method therefore returns before the script has actually been executed.
+        /// This simple helper extension will encapsulate params in single quotes (unless int, uint, etc)
+        /// </summary>
+        /// <param name="browser">The ChromiumWebBrowser instance this method extends</param>
+        /// <param name="methodName">The javascript method name to execute</param>
+        /// <param name="args">the arguments to be passed as params to the method</param>
+        public static void ExecuteScriptAsync(this IWebBrowser browser, string methodName, params object[] args)
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.Append(methodName);
+            stringBuilder.Append("(");
+
+            if(args.Length > 0)
+            { 
+                for (int i = 0; i < args.Length; i++)
+                {
+                    var obj = args[i];
+                    if(obj == null)
+                    {
+                        stringBuilder.Append("null");
+                    }
+                    else
+                    {
+                        var encapsulateInSingleQuotes = !numberTypes.Contains(obj.GetType());
+                        if(encapsulateInSingleQuotes)
+                        {
+                            stringBuilder.Append("'");
+                        }
+
+                        stringBuilder.Append(args[i].ToString());
+
+                        if (encapsulateInSingleQuotes)
+                        {
+                            stringBuilder.Append("'");
+                        }
+                    }
+
+                    stringBuilder.Append(", ");
+                }
+            
+                //Remove the trailing comma
+                stringBuilder.Remove(stringBuilder.Length - 2, 2);
+            }
+
+            stringBuilder.Append(");");
+
+            var script = stringBuilder.ToString();
+
+            browser.ExecuteScriptAsync(script);
+        }
+
+        /// <summary>
+        /// Execute some Javascript code in the context of this WebBrowser. As the method name implies, the script will be
+        /// executed asynchronously, and the method therefore returns before the script has actually been executed.
         /// </summary>
         /// <param name="browser">The ChromiumWebBrowser instance this method extends</param>
         /// <param name="script">The Javascript code that should be executed.</param>
@@ -311,7 +367,7 @@ namespace CefSharp
         /// Reloads the page being displayed, optionally ignoring the cache (which means the whole page including all .css, .js
         /// etc. resources will be re-fetched).
         /// </summary>
-        /// <param name="browser"></param>
+        /// <param name="browser">The ChromiumWebBrowser instance this method extends</param>
         /// <param name="ignoreCache"><c>true</c> A reload is performed ignoring browser cache; <c>false</c> A reload is
         /// performed using files from the browser cache, if available.</param>
         public static void Reload(this IWebBrowser browser, bool ignoreCache)

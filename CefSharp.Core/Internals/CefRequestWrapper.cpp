@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -14,6 +14,8 @@ namespace CefSharp
     {
         String^ CefRequestWrapper::Url::get()
         {
+            ThrowIfDisposed();
+
             return StringUtils::ToClr(_wrappedRequest->GetURL());
         }
 
@@ -24,17 +26,70 @@ namespace CefSharp
                 throw gcnew System::ArgumentException("cannot be null", "url");
             }
 
+            ThrowIfDisposed();
+
             CefString str = StringUtils::ToNative(url);
             _wrappedRequest->SetURL(str);
         }
 
         String^ CefRequestWrapper::Method::get()
         {
+            ThrowIfDisposed();
+
             return StringUtils::ToClr(_wrappedRequest->GetMethod());
+        }
+
+        void CefRequestWrapper::Method::set(String^ method)
+        {
+            if (method == nullptr)
+            {
+                throw gcnew System::ArgumentException("cannot be null", "method");
+            }
+
+            ThrowIfDisposed();
+
+            _wrappedRequest->SetMethod(StringUtils::ToNative(method));
+        }
+
+        UInt64 CefRequestWrapper::Identifier::get()
+        {
+            ThrowIfDisposed();
+
+            return _wrappedRequest->GetIdentifier();
+        }
+
+        void CefRequestWrapper::SetReferrer(String^ referrerUrl, CefSharp::ReferrerPolicy policy)
+        {
+            ThrowIfDisposed();
+
+            _wrappedRequest->SetReferrer(StringUtils::ToNative(referrerUrl), (cef_referrer_policy_t)policy);
+        }
+
+        String^ CefRequestWrapper::ReferrerUrl::get()
+        {
+            ThrowIfDisposed();
+
+            return StringUtils::ToClr(_wrappedRequest->GetReferrerURL());
+        }
+
+        CefSharp::ResourceType CefRequestWrapper::ResourceType::get()
+        {
+            ThrowIfDisposed();
+
+            return (CefSharp::ResourceType)_wrappedRequest->GetResourceType();
+        }
+
+        CefSharp::ReferrerPolicy CefRequestWrapper::ReferrerPolicy::get()
+        {
+            ThrowIfDisposed();
+
+            return (CefSharp::ReferrerPolicy)_wrappedRequest->GetReferrerPolicy();
         }
 
         NameValueCollection^ CefRequestWrapper::Headers::get()
         {
+            ThrowIfDisposed();
+
             CefRequest::HeaderMap hm;
             _wrappedRequest->GetHeaderMap(hm);
 
@@ -52,6 +107,8 @@ namespace CefSharp
 
         void CefRequestWrapper::Headers::set(NameValueCollection^ headers)
         {
+            ThrowIfDisposed();
+
             CefRequest::HeaderMap hm;
 
             for each(String^ key in headers)
@@ -69,11 +126,15 @@ namespace CefSharp
 
         TransitionType CefRequestWrapper::TransitionType::get()
         {
+            ThrowIfDisposed();
+
             return (CefSharp::TransitionType) _wrappedRequest->GetTransitionType();
         }
 
         IPostData^ CefRequestWrapper::PostData::get()
         {
+            ThrowIfDisposed();
+
             if (_postData == nullptr)
             {
                 auto postData = _wrappedRequest->GetPostData();
@@ -83,6 +144,20 @@ namespace CefSharp
                 }
             }
             return _postData;
+        }
+
+        bool CefRequestWrapper::IsReadOnly::get()
+        {
+            ThrowIfDisposed();
+
+            return _wrappedRequest->IsReadOnly();
+        }
+
+        void CefRequestWrapper::InitializePostData()
+        {
+            ThrowIfDisposed();
+
+            _wrappedRequest->SetPostData(CefPostData::Create());
         }
     }
 }

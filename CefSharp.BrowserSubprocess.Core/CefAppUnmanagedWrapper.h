@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Project. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Project. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -25,6 +25,7 @@ namespace CefSharp
         gcroot<ConcurrentDictionary<int, CefBrowserWrapper^>^> _browserWrappers;
         gcroot<List<CefExtension^>^> _extensions;
         gcroot<List<CefCustomScheme^>^> _schemes;
+        bool _focusedNodeChangedEnabled;
 
         // The serialized registered object data waiting to be used (only contains methods and bound async).
         gcroot<JavascriptRootObject^> _javascriptAsyncRootObject;
@@ -35,13 +36,14 @@ namespace CefSharp
     public:
         static const CefString kPromiseCreatorFunction;
 
-        CefAppUnmanagedWrapper(List<CefCustomScheme^>^ schemes, Action<CefBrowserWrapper^>^ onBrowserCreated, Action<CefBrowserWrapper^>^ onBrowserDestoryed)
+        CefAppUnmanagedWrapper(List<CefCustomScheme^>^ schemes, bool enableFocusedNodeChanged, Action<CefBrowserWrapper^>^ onBrowserCreated, Action<CefBrowserWrapper^>^ onBrowserDestoryed)
         {
             _onBrowserCreated = onBrowserCreated;
             _onBrowserDestroyed = onBrowserDestoryed;
             _browserWrappers = gcnew ConcurrentDictionary<int, CefBrowserWrapper^>();
             _extensions = gcnew List<CefExtension^>();
             _schemes = schemes;
+            _focusedNodeChangedEnabled = enableFocusedNodeChanged;
         }
 
         ~CefAppUnmanagedWrapper()
@@ -72,6 +74,7 @@ namespace CefSharp
         virtual DECL void OnRenderThreadCreated(CefRefPtr<CefListValue> extraInfo) OVERRIDE;
         virtual DECL void OnWebKitInitialized() OVERRIDE;
         virtual DECL void OnRegisterCustomSchemes(CefRefPtr<CefSchemeRegistrar> registrar) OVERRIDE;
+        virtual DECL void OnFocusedNodeChanged(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefDOMNode> node) OVERRIDE;
 
         IMPLEMENT_REFCOUNTING(CefAppUnmanagedWrapper);
     };

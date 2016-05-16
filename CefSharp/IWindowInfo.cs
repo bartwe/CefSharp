@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -20,6 +20,16 @@ namespace CefSharp
 
         void SetAsChild(IntPtr parentHandle, int left, int top, int right, int bottom);
         void SetAsPopup(IntPtr parentHandle, string windowName);
+
+        /// <summary>
+        /// Create the browser using windowless (off-screen) rendering.
+        /// No window will be created for the browser and all rendering will occur via the CefRenderHandler interface.
+        /// </summary>
+        /// <param name="parentHandle">Value will be used to identify monitor info and to act as the parent window for dialogs, context menus, etc.
+        /// If not provided then the main screen monitor will be used and some functionality that requires a parent window may not function correctly.</param>
+        /// <param name="transparent">If is true a transparent background color will be used (RGBA=0x00000000). 
+        /// If is false the background will be white and opaque. 
+        /// In order to create windowless browsers the CefSettings.windowless_rendering_enabled value must be set to true.</param>
         void SetAsWindowless(IntPtr parentHandle, bool transparent);
     }
 }

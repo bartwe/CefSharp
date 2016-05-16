@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -22,7 +22,7 @@ namespace CefSharp.OffScreen.Example
             Console.WriteLine();
 
             // You need to replace this with your own call to Cef.Initialize();
-            CefExample.Init(true);
+            CefExample.Init(true, multiThreadedMessageLoop:true);
 
             MainAsync("cachePath1", 1.0);
             //Demo showing Zoom Level of 3.0
@@ -62,6 +62,8 @@ namespace CefSharp.OffScreen.Example
                     };
                 }
                 await LoadPageAsync(browser);
+
+                var preferences = requestContext.GetAllPreferences(true);
 
                 // For Google.com pre-pupulate the search text box
                 await browser.EvaluateScriptAsync("document.getElementById('lst-ib').value = 'CefSharp Was Here!'");

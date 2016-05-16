@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -37,7 +37,7 @@ namespace CefSharp.Internals
                 if (!running)
                 {
                     cancellationTokenSource = new CancellationTokenSource();
-                    Task.Factory.StartNew(ConsumeTasks, TaskCreationOptions.LongRunning);
+                    Task.Factory.StartNew(ConsumeTasks, cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
                     running = true;
                 }
             }

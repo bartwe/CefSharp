@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -124,7 +124,7 @@ namespace CefSharp
 
                 if(bitmapInfo->DirtyRectSupport)
                 {
-                    //NOTE: According to https://bitbucket.org/chromiumembedded/branches-2171-cef3/commits/ce984ddff3268a50cf9967487327e1257015b98c
+                    //NOTE: According to https://bitbucket.org/chromiumembedded/cef/commits/1ddb0ba41d7052eaad50b8d9de959f3b5e05ff21?at=master
                     // There is only one rect now that's a union of all dirty regions. API Still passes in a vector
 
                     for(auto const& r: dirtyRects) {

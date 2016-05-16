@@ -1,4 +1,4 @@
-﻿// Copyright © 2010-2015 The CefSharp Project. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Project. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -27,6 +27,7 @@ namespace CefSharp
         initonly List<JavascriptObjectWrapper^>^ _wrappedObjects;
         initonly List<JavascriptAsyncObjectWrapper^>^ _wrappedAsyncObjects;
         initonly Dictionary<int64, JavascriptAsyncMethodCallback^>^ _methodCallbacks;
+        bool _isBound;
         int64 _lastCallback;
         IBrowserProcess^ _browserProcess;
         // The entire set of possible JavaScript functions to
@@ -41,6 +42,11 @@ namespace CefSharp
             CefSharp::Internals::JavascriptCallbackRegistry^ get();
         }
 
+        property bool IsBound
+        {
+            bool get();
+        }
+
     public:
         JavascriptRootObjectWrapper(int browserId, IBrowserProcess^ browserProcess)
         {
@@ -49,6 +55,7 @@ namespace CefSharp
             _wrappedAsyncObjects = gcnew List<JavascriptAsyncObjectWrapper^>();
             _callbackRegistry = gcnew JavascriptCallbackRegistry(browserId);
             _methodCallbacks = gcnew Dictionary<int64, JavascriptAsyncMethodCallback^>();
+            _isBound = false;
         }
 
         ~JavascriptRootObjectWrapper()

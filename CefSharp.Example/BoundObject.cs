@@ -1,8 +1,9 @@
-﻿// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+﻿// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CefSharp.Example
@@ -56,7 +57,9 @@ namespace CefSharp.Example
 
                 using (javascriptCallback)
                 {
-                    await javascriptCallback.ExecuteAsync("This callback from C# was delayed " + taskDelay + "ms");
+                    //NOTE: Classes are not supported, simple structs are
+                    var response = new CallbackResponseStruct("This callback from C# was delayed " + taskDelay + "ms");
+                    await javascriptCallback.ExecuteAsync(response);
                 }
             });
         }
@@ -267,6 +270,31 @@ namespace CefSharp.Example
         public SubBoundObject GetSubObject()
         {
             return SubObject;
+        }
+
+        /// <summary>
+        /// Demonstrates the use of params as an argument in a bound object
+        /// </summary>
+        /// <param name="name">Dummy Argument</param>
+        /// <param name="args">Params Argument</param>
+        public string MethodWithParams(string name, params object[] args)
+        {
+            return "Name:" + name + ";Args:" + string.Join(", ", args.ToArray());
+        }
+
+        public string MethodWithoutParams(string name, string arg2)
+        {
+            return string.Format("{0}, {1}", name, arg2);
+        }
+
+        public string MethodWithoutAnything()
+        {
+            return "Method without anything called and returned successfully.";
+        }
+
+        public string MethodWithThreeParamsOneOptionalOneArray(string name, string optionalParam = null, params object[] args)
+        {
+            return "MethodWithThreeParamsOneOptionalOneArray:" + (name ?? "No Name Specified") + " - " + (optionalParam ?? "No Optional Param Specified") + ";Args:" + string.Join(", ", args.ToArray());
         }
     }
 }

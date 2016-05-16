@@ -1,4 +1,4 @@
-// Copyright © 2010-2015 The CefSharp Authors. All rights reserved.
+// Copyright © 2010-2016 The CefSharp Authors. All rights reserved.
 //
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
@@ -16,6 +16,7 @@
 #include "Internals/CookieManager.h"
 #include "Internals/PluginVisitor.h"
 #include "CefSettings.h"
+#include "RequestContext.h"
 #include "SchemeHandlerFactoryWrapper.h"
 #include "Internals/CefTaskScheduler.h"
 #include "Internals/CefGetGeolocationCallbackWrapper.h"
@@ -50,7 +51,9 @@ namespace CefSharp
 
     public:
         /// <summary>
-        /// Called on the browser process UI thread immediately after the CEF context has been initialized. 
+        /// Called on the CEF UI thread immediately after the CEF context has been initialized.
+        /// You can now access the Global RequestContext through Cef.GetGlobalRequestContext() - this is the
+        /// first place you can set Preferences (e.g. proxy settings, spell check dictionaries).
         /// </summary>
         static property Action^ OnContextInitialized;
 
@@ -222,6 +225,26 @@ namespace CefSharp
             CefDoMessageLoopWork();
         }
 
+
+        /// <summary>
+        /// This function should be called from the application entry point function to execute a secondary process.
+        /// It can be used to run secondary processes from the browser client executable (default behavior) or
+        /// from a separate executable specified by the CefSettings.browser_subprocess_path value.
+        /// If called for the browser process (identified by no "type" command-line value) it will return immediately with a value of -1.
+        /// If called for a recognized secondary process it will block until the process should exit and then return the process exit code.
+        /// The |application| parameter may be empty. The |windows_sandbox_info| parameter is only used on Windows and may be NULL (see cef_sandbox_win.h for details). 
+        /// </summary>
+        static int ExecuteProcess()
+        {
+            auto hInstance = Process::GetCurrentProcess()->Handle;
+
+            CefMainArgs cefMainArgs((HINSTANCE)hInstance.ToPointer());
+            //TODO: Look at ways to expose an instance of CefApp
+            //CefRefPtr<CefSharpApp> app(new CefSharpApp(nullptr, nullptr));
+
+            return CefExecuteProcess(cefMainArgs, NULL, NULL);
+        }
+
         /// <summary>Add an entry to the cross-origin whitelist.</summary>
         /// <param name="sourceOrigin">The origin allowed to be accessed by the target protocol/domain.</param>
         /// <param name="targetProtocol">The target protocol allowed to access the source origin.</param>
@@ -316,7 +339,11 @@ namespace CefSharp
         static ICookieManager^ GetGlobalCookieManager()
         {
             auto cookieManager = CefCookieManager::GetGlobalManager(NULL);
-            return gcnew CookieManager(cookieManager);
+            if (cookieManager.get())
+            {
+                return gcnew CookieManager(cookieManager);
+            }
+            return nullptr;
         }
 
         /// <summary>
@@ -453,6 +480,31 @@ namespace CefSharp
             CefGetGeolocation(callback);
 
             return callback->GetTask();
+        }
+
+        /// <summary>
+        /// Returns true if called on the specified CEF thread.
+        /// </summary>
+        /// <return>Returns true if called on the specified thread.</return>
+        static bool CurrentlyOnThread(CefThreadIds threadId)
+        {
+            return CefCurrentlyOn((CefThreadId)threadId);
+        }
+
+        /// <summary>
+        /// Gets the Global Request Context. Make sure to Dispose of this object when finished.
+        /// </summary>
+        /// <return>Returns the global request context or null.</return>
+        static IRequestContext^ GetGlobalRequestContext()
+        {
+            auto context = CefRequestContext::GetGlobalContext();
+
+            if (context.get())
+            {
+                return gcnew RequestContext(context);
+            }
+
+            return nullptr;
         }
     };
 }
