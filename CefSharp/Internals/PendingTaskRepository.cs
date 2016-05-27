@@ -16,8 +16,8 @@ namespace CefSharp.Internals
     /// <typeparam name="TResult">The type of the result produced by the tasks held.</typeparam>
     public sealed class PendingTaskRepository<TResult>
     {
-        private readonly ConcurrentDictionary<long, TaskCompletionSource<TResult>> pendingTasks =
-            new ConcurrentDictionary<long, TaskCompletionSource<TResult>>();
+        private readonly Dictionary<long, TaskCompletionSource<TResult>> pendingTasks =
+            new Dictionary<long, TaskCompletionSource<TResult>>();
         //should only be accessed by Interlocked.Increment
         private long lastId;
 
@@ -31,7 +31,9 @@ namespace CefSharp.Internals
             var taskCompletionSource = new TaskCompletionSource<TResult>();
 
             var id = Interlocked.Increment(ref lastId);
-            pendingTasks.TryAdd(id, taskCompletionSource);
+            lock (pendingTasks) {
+                pendingTasks[id] = taskCompletionSource;
+            }
 
             if (timeout.HasValue)
             {
@@ -51,7 +53,10 @@ namespace CefSharp.Internals
         public TaskCompletionSource<TResult> RemovePendingTask(long id)
         {
             TaskCompletionSource<TResult> result;
-            pendingTasks.TryRemove(id, out result);
+            lock (pendingTasks) {
+                if (pendingTasks.TryGetValue(id, out result))
+                    pendingTasks.Remove(id);
+            }
             return result;
         }
     }
