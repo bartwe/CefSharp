@@ -122,7 +122,7 @@ namespace CefSharp
 
                 CefDirtyRect rect = CefDirtyRect(0, 0, 0, 0);
 
-                if(bitmapInfo->DirtyRectSupport)
+                if (bitmapInfo->DirtyRectSupport)
                 {
                     //NOTE: According to https://bitbucket.org/chromiumembedded/cef/commits/1ddb0ba41d7052eaad50b8d9de959f3b5e05ff21?at=master
                     // There is only one rect now that's a union of all dirty regions. API Still passes in a vector
@@ -135,14 +135,15 @@ namespace CefSharp
                 {
                     rect = CefDirtyRect(0, 0, width, height);
                 }
-				
+
                 auto backBufferHandle = (HANDLE)bitmapInfo->BackBufferHandle;
 
-                if (backBufferHandle == NULL || bitmapInfo->Width != width || bitmapInfo->Height != height)
+                auto directMode = bitmapInfo->DirectModeSupport;
+
+                if (((backBufferHandle == NULL) && !directMode) || bitmapInfo->Width != width || bitmapInfo->Height != height)
                 {
                     int pixels = width * height;
                     int numberOfBytes = pixels * bitmapInfo->BytesPerPixel;
-                    auto fileMappingHandle = (HANDLE)bitmapInfo->FileMappingHandle;
 
                     //Clear the reference to Bitmap so a new one is created by InvokeRenderAsync
                     bitmapInfo->ClearBitmap();
@@ -150,25 +151,27 @@ namespace CefSharp
                     //Release the current handles (if not null)
                     ReleaseBitmapHandlers(bitmapInfo);
 
-                    // Create new fileMappingHandle
-                    fileMappingHandle = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, numberOfBytes, NULL);
-                    if (fileMappingHandle == NULL)
-                    {
-                        // TODO: Consider doing something more sensible here, since the browser will be very badly broken if this
-                        // TODO: method call fails.
-                        return;
-                    }
+                    if (!directMode) {
+                        // Create new fileMappingHandle
+                        HANDLE fileMappingHandle = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, numberOfBytes, NULL);
+                        if (fileMappingHandle == NULL)
+                        {
+                            // TODO: Consider doing something more sensible here, since the browser will be very badly broken if this
+                            // TODO: method call fails.
+                            return;
+                        }
 
-                    backBufferHandle = MapViewOfFile(fileMappingHandle, FILE_MAP_ALL_ACCESS, 0, 0, numberOfBytes);
-                    if (backBufferHandle == NULL)
-                    {
-                        // TODO: Consider doing something more sensible here, since the browser will be very badly broken if this
-                        // TODO: method call fails.
-                        return;
-                    }
+                        backBufferHandle = MapViewOfFile(fileMappingHandle, FILE_MAP_ALL_ACCESS, 0, 0, numberOfBytes);
+                        if (backBufferHandle == NULL)
+                        {
+                            // TODO: Consider doing something more sensible here, since the browser will be very badly broken if this
+                            // TODO: method call fails.
+                            return;
+                        }
 
-                    bitmapInfo->FileMappingHandle = (IntPtr)fileMappingHandle;
-                    bitmapInfo->BackBufferHandle = (IntPtr)backBufferHandle;
+                        bitmapInfo->FileMappingHandle = (IntPtr)fileMappingHandle;
+                        bitmapInfo->BackBufferHandle = (IntPtr)backBufferHandle;
+                    }
                     bitmapInfo->Width = width;
                     bitmapInfo->Height = height;
                     bitmapInfo->NumberOfBytes = numberOfBytes;
@@ -179,13 +182,17 @@ namespace CefSharp
 
                 if ((rect.Width != 0) && (rect.Height != 0))
                 {
-                    // If pixels have changed, copy them over.
-                    int offset = bitmapInfo->BytesPerPixel * rect.Y * width;
-                    int count = bitmapInfo->BytesPerPixel * rect.Height * width;
-                    CopyMemory(((uint8_t*)backBufferHandle) + offset, ((uint8_t*)buffer) + offset, count);
+                    if (directMode) {
+                        bitmapInfo->DirectUpdate(rect, (IntPtr)(void*)buffer);
+                    }
+                    else {
+                        // If pixels have changed, copy them over.
+                        int offset = bitmapInfo->BytesPerPixel * rect.Y * width;
+                        int count = bitmapInfo->BytesPerPixel * rect.Height * width;
+                        CopyMemory(((uint8_t*)backBufferHandle) + offset, ((uint8_t*)buffer) + offset, count);
+                        bitmapInfo->DirtyRect = bitmapInfo->DirtyRect.Combine(rect);
+                    }
                 }
-
-                bitmapInfo->DirtyRect = bitmapInfo->DirtyRect.Combine(rect);
 
                 _renderWebBrowser->InvokeRenderAsync(bitmapInfo);
             };

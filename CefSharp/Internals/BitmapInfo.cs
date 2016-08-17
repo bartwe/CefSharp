@@ -26,6 +26,9 @@ namespace CefSharp.Internals
 
         public CefDirtyRect DirtyRect { get; set; }
 
+        public bool DirectModeSupport { get; set; }
+        public virtual void DirectUpdate(CefDirtyRect rect, IntPtr buffer) {}
+
         protected BitmapInfo()
         {
             BitmapLock = new object();
