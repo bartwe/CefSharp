@@ -11,9 +11,9 @@ namespace CefSharp
         private ref class JavascriptCallbackFactory : public IJavascriptCallbackFactory
         {
         private:
-            PendingTaskRepository<JavascriptResponse^>^ _pendingTasks;
+            PendingTaskRepository^ _pendingTasks;
         public:
-            JavascriptCallbackFactory(PendingTaskRepository<JavascriptResponse^>^ pendingTasks)
+            JavascriptCallbackFactory(PendingTaskRepository^ pendingTasks)
                 :_pendingTasks(pendingTasks)
             {
             }

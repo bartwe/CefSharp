@@ -42,7 +42,7 @@ namespace CefSharp
             gcroot<String^> _tooltip;
             gcroot<IBrowserAdapter^> _browserAdapter;
             //contains in-progress eval script tasks
-            gcroot<PendingTaskRepository<JavascriptResponse^>^> _pendingTaskRepository;
+            gcroot<PendingTaskRepository^> _pendingTaskRepository;
             //contains js callback factories for each browser
 
             void ThrowUnknownPopupBrowser(String^ context)
@@ -56,7 +56,7 @@ namespace CefSharp
             ClientAdapter(IWebBrowserInternal^ browserControl, IBrowserAdapter^ browserAdapter) :
                 _browserControl(browserControl), 
                 _popupBrowsers(gcnew Dictionary<int, IBrowser^>()),
-                _pendingTaskRepository(gcnew PendingTaskRepository<JavascriptResponse^>()),
+                _pendingTaskRepository(gcnew PendingTaskRepository()),
                 _browserAdapter(browserAdapter),
                 _browserHwnd(NULL)
             {
@@ -80,7 +80,7 @@ namespace CefSharp
             }
 
             HWND GetBrowserHwnd() { return _browserHwnd; }
-            PendingTaskRepository<JavascriptResponse^>^ GetPendingTaskRepository();
+            PendingTaskRepository^ GetPendingTaskRepository();
             void CloseAllPopups(bool forceClose);
             void MethodInvocationComplete(MethodInvocationResult^ result);
             IBrowser^ GetBrowserWrapper(int browserId);
@@ -197,6 +197,8 @@ namespace CefSharp
 
             //sends out an eval script request to the render process
             Task<JavascriptResponse^>^ EvaluateScriptAsync(int browserId, bool isBrowserPopup, int64 frameId, String^ script, Nullable<TimeSpan> timeout);
+
+            void EvaluateScriptAsyncReceiver(int browserId, bool isBrowserPopup, int64 frameId, String^ script, JavascriptResponseReceiver^ receiver);
 
             IMPLEMENT_REFCOUNTING(ClientAdapter);
         };

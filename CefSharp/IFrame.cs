@@ -113,6 +113,9 @@ namespace CefSharp
         /// <returns>A Task that can be awaited to perform the script execution</returns>
         Task<JavascriptResponse> EvaluateScriptAsync(string script, TimeSpan? timeout = null);
 
+
+        void EvaluateScriptAsyncReceiver(string script, JavascriptResponseReceiver response);
+
         /// <summary>
         /// Returns true if this is the main (top-level) frame.
         /// </summary>

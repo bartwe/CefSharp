@@ -19,4 +19,10 @@ namespace CefSharp
         [DataMember]
         public object Result { get; set; }
     }
+
+    public abstract class JavascriptResponseReceiver {
+        public long Key;
+
+        public abstract void Receive(bool list, object value);
+    }
 }

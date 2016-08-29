@@ -1105,22 +1105,39 @@ namespace CefSharp
                 auto success = argList->GetBool(0);
                 auto callbackId = GetInt64(argList, 1);
 
-                auto pendingTask = _pendingTaskRepository->RemovePendingTask(callbackId);
-                if (pendingTask != nullptr)
+                if (_pendingTaskRepository->IsTask(callbackId)) {
+                    auto pendingTask = _pendingTaskRepository->RemovePendingTask(callbackId);
+                    if (pendingTask != nullptr)
+                    {
+                        auto response = gcnew JavascriptResponse();
+                        response->Success = success;
+       
+                        if (success)
+                        {
+                            response->Result = DeserializeObject(argList, 2, callbackFactory);
+                        }
+                        else
+                        {
+                            response->Message = StringUtils::ToClr(argList->GetString(2));
+                        }
+       
+                        pendingTask->SetResult(response);
+                    }
+                }
+                else 
                 {
-                    auto response = gcnew JavascriptResponse();
-                    response->Success = success;
-
-                    if (success)
+                    auto receiver = _pendingTaskRepository->RemoveReceiver(callbackId);
+                    if (receiver != nullptr)
                     {
-                        response->Result = DeserializeObject(argList, 2, callbackFactory);
+                        if (success)
+                        {
+                            receiver->Receive(success, DeserializeObject(argList, 2, callbackFactory));
+                        }
+                        else
+                        {
+                            receiver->Receive(success, StringUtils::ToClr(argList->GetString(2)));
+                        }
                     }
-                    else
-                    {
-                        response->Message = StringUtils::ToClr(argList->GetString(2));
-                    }
-
-                    pendingTask->SetResult(response);
                 }
 
                 handled = true;
@@ -1164,7 +1181,26 @@ namespace CefSharp
             return idAndComplectionSource.Value->Task;
         }
 
-        PendingTaskRepository<JavascriptResponse^>^ ClientAdapter::GetPendingTaskRepository()
+        void ClientAdapter::EvaluateScriptAsyncReceiver(int browserId, bool isBrowserPopup, int64 frameId, String^ script, JavascriptResponseReceiver^ receiver)
+        {
+            //create a new taskcompletionsource
+            _pendingTaskRepository->RegisterReceiver(receiver);
+
+            auto message = CefProcessMessage::Create(kEvaluateJavascriptRequest);
+            auto argList = message->GetArgumentList();
+            int64 id = receiver->Key;
+            SetInt64(argList, 0, frameId);
+            SetInt64(argList, 1, id);
+            argList->SetString(2, StringUtils::ToNative(script));
+
+            auto browserWrapper = static_cast<CefSharpBrowserWrapper^>(GetBrowserWrapper(browserId, isBrowserPopup, false));
+
+            browserWrapper->SendProcessMessage(CefProcessId::PID_RENDERER, message);
+
+            return;
+        }
+
+        PendingTaskRepository^ ClientAdapter::GetPendingTaskRepository()
         {
             return _pendingTaskRepository;
         }

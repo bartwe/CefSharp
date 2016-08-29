@@ -161,6 +161,8 @@ namespace CefSharp
 
             virtual Task<JavascriptResponse^>^ EvaluateScriptAsync(String^ script, Nullable<TimeSpan> timeout);
 
+            virtual void EvaluateScriptAsyncReceiver(String^ script, JavascriptResponseReceiver^ response);
+
             ///
             // Returns true if this is the main (top-level) frame.
             ///

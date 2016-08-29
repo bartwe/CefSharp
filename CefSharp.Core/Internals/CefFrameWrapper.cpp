@@ -219,6 +219,19 @@ Task<JavascriptResponse^>^ CefFrameWrapper::EvaluateScriptAsync(String^ script, 
     return client->EvaluateScriptAsync(browser->GetIdentifier(), browser->IsPopup(), _frame->GetIdentifier(), script, timeout);
 }
 
+void CefFrameWrapper::EvaluateScriptAsyncReceiver(String^ script, JavascriptResponseReceiver^ response)
+{
+    ThrowIfDisposed();
+    ThrowIfFrameInvalid();
+
+    auto browser = _frame->GetBrowser();
+    auto host = browser->GetHost();
+
+    auto client = static_cast<ClientAdapter*>(host->GetClient().get());
+
+    client->EvaluateScriptAsyncReceiver(browser->GetIdentifier(), browser->IsPopup(), _frame->GetIdentifier(), script, response);
+}
+
 ///
 // Returns true if this is the main (top-level) frame.
 ///

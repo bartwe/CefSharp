@@ -14,10 +14,14 @@ namespace CefSharp.Internals
     /// Class to store TaskCompletionSources indexed by a unique id.
     /// </summary>
     /// <typeparam name="TResult">The type of the result produced by the tasks held.</typeparam>
-    public sealed class PendingTaskRepository<TResult>
+    public sealed class PendingTaskRepository
     {
-        private readonly Dictionary<long, TaskCompletionSource<TResult>> pendingTasks =
-            new Dictionary<long, TaskCompletionSource<TResult>>();
+        private readonly Dictionary<long, TaskCompletionSource<JavascriptResponse>> pendingTasks =
+            new Dictionary<long, TaskCompletionSource<JavascriptResponse>>();
+
+        private readonly Dictionary<long, JavascriptResponseReceiver> pendingReceivers =
+            new Dictionary<long, JavascriptResponseReceiver>();
+        
         //should only be accessed by Interlocked.Increment
         private long lastId;
 
@@ -26,11 +30,12 @@ namespace CefSharp.Internals
         /// </summary>
         /// <param name="timeout">The maximum running time of the task.</param>
         /// <returns>The unique id of the newly created pending task and the newly created <see cref="TaskCompletionSource{TResult}"/>.</returns>
-        public KeyValuePair<long, TaskCompletionSource<TResult>> CreatePendingTask(TimeSpan? timeout = null)
+        public KeyValuePair<long, TaskCompletionSource<JavascriptResponse>> CreatePendingTask(TimeSpan? timeout = null)
         {
-            var taskCompletionSource = new TaskCompletionSource<TResult>();
+            var taskCompletionSource = new TaskCompletionSource<JavascriptResponse>();
 
             var id = Interlocked.Increment(ref lastId);
+            id = id << 1;
             lock (pendingTasks) {
                 pendingTasks[id] = taskCompletionSource;
             }
@@ -40,7 +45,7 @@ namespace CefSharp.Internals
                 taskCompletionSource = taskCompletionSource.WithTimeout(timeout.Value, () => RemovePendingTask(id));
             }
 
-            return new KeyValuePair<long, TaskCompletionSource<TResult>>(id, taskCompletionSource);
+            return new KeyValuePair<long, TaskCompletionSource<JavascriptResponse>>(id, taskCompletionSource);
         }
 
         /// <summary>
@@ -50,14 +55,41 @@ namespace CefSharp.Internals
         /// <returns>
         /// The <see cref="TaskCompletionSource{TResult}"/> associated with the given id.
         /// </returns>
-        public TaskCompletionSource<TResult> RemovePendingTask(long id)
+        public TaskCompletionSource<JavascriptResponse> RemovePendingTask(long id)
         {
-            TaskCompletionSource<TResult> result;
+            TaskCompletionSource<JavascriptResponse> result;
             lock (pendingTasks) {
                 if (pendingTasks.TryGetValue(id, out result))
                     pendingTasks.Remove(id);
             }
             return result;
+        }
+
+
+        public void RegisterReceiver(JavascriptResponseReceiver receiver)
+        {
+            var id = Interlocked.Increment(ref lastId);
+            id = (id << 1) | 1;
+            lock (pendingReceivers) {
+                pendingReceivers[id] = receiver;
+            }
+
+            receiver.Key = id;
+        }
+
+        public JavascriptResponseReceiver RemoveReceiver(long id)
+        {
+            JavascriptResponseReceiver result;
+            lock (pendingReceivers) {
+                if (pendingReceivers.TryGetValue(id, out result))
+                    pendingReceivers.Remove(id);
+            }
+            return result;
+        }
+
+        public bool IsTask(long id)
+        {
+            return (id & 1) == 0;
         }
     }
 }
