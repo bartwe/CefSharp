@@ -10,6 +10,17 @@ using System.Threading.Tasks;
 
 namespace CefSharp.Internals
 {
+    public sealed class LongComparer : IEqualityComparer<long> {
+        public bool Equals(long x, long y) {
+            return x == y;
+        }
+
+        public int GetHashCode(long obj) {
+            unchecked {
+                return (int)(obj & 0xffffffff);
+            }
+        }
+    }
     /// <summary>
     /// Class to store TaskCompletionSources indexed by a unique id.
     /// </summary>
@@ -17,10 +28,10 @@ namespace CefSharp.Internals
     public sealed class PendingTaskRepository
     {
         private readonly Dictionary<long, TaskCompletionSource<JavascriptResponse>> pendingTasks =
-            new Dictionary<long, TaskCompletionSource<JavascriptResponse>>();
+            new Dictionary<long, TaskCompletionSource<JavascriptResponse>>(new LongComparer());
 
         private readonly Dictionary<long, JavascriptResponseReceiver> pendingReceivers =
-            new Dictionary<long, JavascriptResponseReceiver>();
+            new Dictionary<long, JavascriptResponseReceiver>(new LongComparer());
         
         //should only be accessed by Interlocked.Increment
         private long lastId;
