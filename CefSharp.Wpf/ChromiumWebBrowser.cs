@@ -309,7 +309,7 @@ namespace CefSharp.Wpf
         {
             UiThreadRunAsync(delegate
             {
-                lock (bitmapInfo.BitmapLock)
+                bitmapInfo.BitmapLock();
                 {
                     var wpfBitmapInfo = (WpfBitmapInfo)bitmapInfo;
                     // Inform parents that the browser rendering is updating
@@ -328,6 +328,7 @@ namespace CefSharp.Wpf
 
                     wpfBitmapInfo.Invalidate();
                 }
+                bitmapInfo.BitmapUnlock();
             },
             DispatcherPriority.Render);
         }

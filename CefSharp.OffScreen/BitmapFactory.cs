@@ -18,7 +18,7 @@ namespace CefSharp.OffScreen
         BitmapInfo IBitmapFactory.CreateBitmap(bool isPopup, double dpiScale)
         {
             //The bitmap buffer is 32 BPP
-            return new GdiBitmapInfo { IsPopup = isPopup, BitmapLock = bitmapLock };
+            return new GdiBitmapInfo { IsPopup = isPopup, BitmapLockObject = bitmapLock };
         }
     }
 }

@@ -116,9 +116,9 @@ namespace CefSharp
             virtual DECL void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList& dirtyRects,
                 const void* buffer, int width, int height) OVERRIDE
             {
-                auto bitmapInfo = type == PET_VIEW ? _mainBitmapInfo : _popupBitmapInfo;
+                BitmapInfo^ bitmapInfo = type == PET_VIEW ? _mainBitmapInfo : _popupBitmapInfo;
 
-                lock l(bitmapInfo->BitmapLock);
+                bitmapInfo->BitmapLock();
 
                 CefDirtyRect rect = CefDirtyRect(0, 0, 0, 0);
 
@@ -158,6 +158,7 @@ namespace CefSharp
                         {
                             // TODO: Consider doing something more sensible here, since the browser will be very badly broken if this
                             // TODO: method call fails.
+                            bitmapInfo->BitmapUnlock();
                             return;
                         }
 
@@ -166,6 +167,7 @@ namespace CefSharp
                         {
                             // TODO: Consider doing something more sensible here, since the browser will be very badly broken if this
                             // TODO: method call fails.
+                            bitmapInfo->BitmapUnlock();
                             return;
                         }
 
@@ -193,7 +195,7 @@ namespace CefSharp
                         bitmapInfo->DirtyRect = bitmapInfo->DirtyRect.Combine(rect);
                     }
                 }
-
+                bitmapInfo->BitmapUnlock();
                 _renderWebBrowser->InvokeRenderAsync(bitmapInfo);
             };
 

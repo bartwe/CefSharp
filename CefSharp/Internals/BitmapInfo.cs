@@ -3,12 +3,12 @@
 // Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
 using System;
+using System.Threading;
 
 namespace CefSharp.Internals
 {
     public abstract class BitmapInfo
     {
-        public object BitmapLock;
         public IntPtr BackBufferHandle;
 
         public bool IsPopup { get; set; }
@@ -29,9 +29,18 @@ namespace CefSharp.Internals
         public bool DirectModeSupport { get; set; }
         public virtual void DirectUpdate(CefDirtyRect rect, IntPtr buffer) {}
 
-        protected BitmapInfo()
-        {
-            BitmapLock = new object();
+        public object BitmapLockObject;
+
+        protected BitmapInfo() {
+            BitmapLockObject = new object();
+        }
+
+        public void BitmapLock() {
+            Monitor.Enter(BitmapLockObject);
+        }
+
+        public void BitmapUnlock() {
+            Monitor.Exit(BitmapLockObject);
         }
     }
 }
